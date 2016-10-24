@@ -7,7 +7,7 @@
 #include <fstream>
 #include <opencv2/imgcodecs.hpp>
 
-ReportWriter::ReportWriter(std::string outdir, std::string filename, std::string templateFolder) : m_outdir(outdir), m_filename(filename), m_templateFolder(templateFolder)
+ReportWriter::ReportWriter(std::string outdir, std::string filename, std::string templateFolder) : m_outdir(outdir + "/" + filename), m_filename(filename), m_templateFolder(templateFolder)
 {
 	
 
@@ -18,7 +18,7 @@ ReportWriter::~ReportWriter()
 	
 }
 
-void ReportWriter::writeXMLReport(std::vector<cv::Rect> bounds, std::vector<int> depths_contour, std::vector<double> vals_contour, double time)
+void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 {
 	std::ifstream infile;
 	std::string templateFile = "template.xml";
@@ -56,16 +56,16 @@ void ReportWriter::writeXMLReport(std::vector<cv::Rect> bounds, std::vector<int>
 	outfile << "<MAXIMAGE>maximum.png</MAXIMAGE>" << std::endl;
 	outfile << "<TIME>" << time << "</TIME>" << std::endl;
 
-	for (size_t c = 0; c < bounds.size(); c++)
+	for (size_t c = 0; c < contours.size(); c++)
 	{
 		outfile << "<ROI>" << std::endl;
 		outfile << "<CONTOUR>" << c << "</CONTOUR>" << std::endl;
-		outfile << "<X>" << (bounds[c].tl() + bounds[c].br()).x * 0.5 << "</X>" << std::endl;
-		outfile << "<Y>" << (bounds[c].tl() + bounds[c].br()).y * 0.5 << "</Y>" << std::endl;
-		outfile << "<WIDTH>" << bounds[c].width << "</WIDTH>" << std::endl;
-		outfile << "<HEIGHT>" << bounds[c].height << "</HEIGHT>" << std::endl;
-		outfile << "<DEPTH>" << depths_contour[c] << "</DEPTH>" << std::endl;
-		outfile << "<VAL>" << vals_contour[c] << "</VAL>" << std::endl;
+		outfile << "<X>" << (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).x * 0.5 << "</X>" << std::endl;
+		outfile << "<Y>" << (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).y * 0.5 << "</Y>" << std::endl;
+		outfile << "<WIDTH>" << contours[c]->getBoundingBox().width << "</WIDTH>" << std::endl;
+		outfile << "<HEIGHT>" << contours[c]->getBoundingBox().height << "</HEIGHT>" << std::endl;
+		outfile << "<DEPTH>" << contours[c]->getDepth() << "</DEPTH>" << std::endl;
+		outfile << "<VAL>" << contours[c]->getValue() << "</VAL>" << std::endl;
 		outfile << "<IMAGE>" << "contours_" + std::to_string(((long long)c)) + ".png" << "</IMAGE>" << std::endl;
 		outfile << "<IMAGEPHASE>" << "contoursPhase_" + std::to_string(((long long)c)) + ".png" << "</IMAGEPHASE>" << std::endl;
 		outfile << "</ROI>" << std::endl;
@@ -76,15 +76,15 @@ void ReportWriter::writeXMLReport(std::vector<cv::Rect> bounds, std::vector<int>
 	outfile.close();
 }
 
-void ReportWriter::saveROIImages(ImageCache* cache, std::vector<cv::Rect> bounds, std::vector<int> depths_contour)
+void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contours)
 {
-	for (size_t c = 0; c < bounds.size(); c++)
+	for (size_t c = 0; c < contours.size(); c++)
 	{
-		std::cout << "Save Contour " << c << " at depth " << std::to_string(((long long)depths_contour[c])) << std::endl;
-		int d = depths_contour[c];
+		std::cout << "Save Contour " << c << " at depth " << std::to_string(((long long)contours[c]->getDepth())) << std::endl;
+		int d = contours[c]->getDepth();
 		cv::Mat *image = cache->getPhaseImage(d);
 
-		cv::Rect bound_cont = bounds[c];
+		cv::Rect bound_cont = contours[c]->getBoundingBox();
 		bound_cont.x = bound_cont.x - 20;
 		bound_cont.y = bound_cont.y - 20;
 		bound_cont.width = bound_cont.width + 40;
@@ -105,13 +105,13 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<cv::Rect> bounds
 		cv::imwrite(m_outdir + "/" + "contoursPhase_" + std::to_string(((long long)c)) + ".png", drawing);
 	}
 
-	for (size_t c = 0; c < bounds.size(); c++)
+	for (size_t c = 0; c < contours.size(); c++)
 	{
-		std::cout << "Save Contour " << c << " at depth " << std::to_string(((long long)depths_contour[c])) << std::endl;
-		int d = depths_contour[c];
+		std::cout << "Save Contour " << c << " at depth " << std::to_string(((long long)contours[c]->getDepth())) << std::endl;
+		int d = contours[c]->getDepth();
 		cv::Mat *image = cache->getAmplitudeImage(d);
 
-		cv::Rect bound_cont = bounds[c];
+		cv::Rect bound_cont = contours[c]->getBoundingBox();
 		bound_cont.x = bound_cont.x - 20;
 		bound_cont.y = bound_cont.y - 20;
 		bound_cont.width = bound_cont.width + 40;

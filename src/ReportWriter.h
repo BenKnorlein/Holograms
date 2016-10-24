@@ -9,14 +9,15 @@
 #include "ImageCache.h"
 
 #include <opencv2/core/core.hpp>
+#include "Contour.h"
 
 class ReportWriter {
 public:
 	ReportWriter(std::string outdir, std::string filename, std::string templateFolder = "");
 	~ReportWriter();
 
-	void writeXMLReport(std::vector<cv::Rect> bounds, std::vector<int> depths_contour, std::vector<double> vals_contour, double time);
-	void saveROIImages(ImageCache* cache, std::vector<cv::Rect> bounds, std::vector<int> depths_contour);
+	void writeXMLReport(std::vector<Contour*> contours, double time);
+	void saveROIImages(ImageCache* cache, std::vector<Contour*> contours);
 	void saveImage(cv::Mat image, std::string filename, bool normalizeImage = false);
 
 private:

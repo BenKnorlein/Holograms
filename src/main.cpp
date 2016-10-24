@@ -9,6 +9,7 @@
 #include "OfflineReader.h"
 #include "ReportWriter.h"
 #include "Settings.h"
+#include "ContourDetection.h"
 
 #include <iostream>
 
@@ -30,6 +31,8 @@
 #include <opencv2/core/core.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
 #include <opencv2/highgui/highgui.hpp>
+#include "Contour.h"
+#include "ContourDepthDetection.h"
 
 using namespace cv;
 
@@ -37,143 +40,6 @@ std::string slash = "/";
 
 double minAll = std::numeric_limits<double>::min();
 double maxAll = std::numeric_limits<double>::max();
-
-cv::Mat findMaximas(Settings * settings, ImageCache* cache, int start, int stop, int step_width, int width, int height, int windowsize, bool show)
-{
-
-	cv::Mat image_maximum(cv::Size(width, height), CV_32FC1, cvScalar(0));
-
-	if (show)
-	{
-		cv::namedWindow("Maximum", cv::WINDOW_NORMAL);
-		cv::resizeWindow("Maximum", 800, 800);
-
-		imshow("Maximum", 0);
-	}
-
-	for (int d = start; d <= stop; d += step_width){
-		std::cout << "Maximum " << d << std::endl;
-
-		//filter image
-		Mat kernel = cv::Mat(windowsize, windowsize, CV_32FC1, Scalar::all(1.0 / (windowsize*windowsize)));
-		cv::Mat image_tmp;
-		filter2D(*cache->getPhaseImage(d), image_tmp, CV_32F, kernel);
-		if (settings->getUseAbs()) image_tmp = cv::abs(image_tmp);
-
-		float* max_ptr = (float *) image_maximum.data;
-		float* image_ptr = (float *) image_tmp.data;
-
-		for (int i = 0; i < width * height; i++, max_ptr++, image_ptr++)
-		{
-			if ( *max_ptr < *image_ptr && *image_ptr)
-			{
-				*max_ptr = *image_ptr;
-			}
-		}
-		
-		
-		if (show)
-		{
-			cv::Mat image_disp;
-			cv::Mat B;
-			normalize(image_maximum, image_disp, 0, 255, CV_MINMAX);
-			image_disp.convertTo(B, CV_8U);
-			imshow("Maximum", B);
-			cv::waitKey(1);
-		}
-	}
-
-	if (show)
-	{
-		destroyWindow("Maximum");
-	}
-
-	return image_maximum;
-}
-
-cv::Mat findContours(std::string outdir, cv::Mat image_maximum, std::vector<std::vector<Point> > &contours, std::vector<cv::Rect> &bounds, double max_threshold, double contour_minArea, bool show)
-{
-
-	normalize(image_maximum, image_maximum, 0.0, 1.0, CV_MINMAX);
-	
-	//threshold	
-	threshold(image_maximum, image_maximum, 1.0 - max_threshold, 1., CV_THRESH_BINARY);
-	
-	//convert to 8U
-	cv::Mat bw;
-	image_maximum.convertTo(bw, CV_8U);
-
-	// Find total markers
-	std::vector<std::vector<Point> > contours_org;
-	findContours(bw, contours_org, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-
-	//filter by Area and position
-	for (size_t i = 0; i < contours_org.size(); i++)
-	{
-		cv::Moments mu = moments(contours_org[i], false);
-		cv::Point2f center = cv::Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00);
-		if (cv::contourArea(contours_org[i]) >= contour_minArea)
-		{
-			contours.push_back(contours_org[i]);
-			cv::Rect boundingBox = boundingRect(contours_org[i]);
-			bounds.push_back(boundingBox);
-		}
-	}
-	std::cout << " Contours found " << contours.size() << std::endl;
-
-	RNG rng(12345);
-	Mat drawing = Mat::zeros(bw.size(), CV_8UC3);
-	for (int i = 0; i< contours.size(); i++)
-	{
-		Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-		drawContours(drawing, contours, i, color, -1, 8, 0, 0, Point());
-		rectangle(drawing, bounds[i].tl(), bounds[i].br(), color, 2, 8, 0);
-		putText(drawing, std::to_string(((long long)i)), bounds[i].br(),
-			FONT_HERSHEY_COMPLEX_SMALL, 2, color, 1, CV_AA);
-	}
-
-	if (show){
-		imshow("Contours", drawing);
-		cvWaitKey(1);
-		destroyWindow("Contours");
-	}
-
-	return drawing;
-}
-
-void setContourDepth(Settings * settings, ImageCache* cache, std::vector<cv::Rect> bounds, std::vector<int> &depths_contour, std::vector<double> &vals_contour
-	, int start, int stop, int step_width, int id = -1)
-{
-	int start_c = (id == -1) ? 0 : id;
-	int stop_c = (id == -1) ? bounds.size() - 1 : id;
-
-	for (int c = start_c; c <= stop_c; c++)
-	{
-		std::cout << "Contour " << c << std::endl;
-		int best_depth = 0;
-		float maxVal = minAll;
-
-		for (int d = start; d <= stop; d += step_width){
-			cv::Mat * image = cache->getPhaseImage(d);
-			cv::Mat tmp;
-			
-			cv::Mat roi;
-			((*image)(bounds[c])).copyTo(roi);
-
-			if (settings->getUseAbs()) roi = cv::abs(roi);
-
-			float val = cv::sum(roi)[0] / bounds[c].area();
-			if (val > maxVal)
-			{
-				maxVal = val;
-				best_depth = d;
-			}
-		}
-		depths_contour[c] = best_depth;
-		vals_contour[c] = maxVal;
-		std::cout << "Best Depth " << best_depth << std::endl;
-	}
-}
 
 bool DoBoxesIntersect(int merge_threshold_dist, cv::Rect a, cv::Rect b) {
 	if (a.x + a.width + merge_threshold_dist< b.x) return false; // a is left of b
@@ -253,31 +119,24 @@ int main(int argc, char** argv)
 	}
 	cache->getImageSource()->setSourceHologram(settings->getDatafolder(), filename);
 
-	////////Load Data
-	//loadImages(cache, min_depth, max_depth, step_size);
-
-	////////Find Maximas
-	cv::Mat image_maximum = findMaximas(settings, cache, settings->getMinDepth(), settings->getMaxDepth(), settings->getStepSize(),settings->getWidth(), settings->getHeight(),settings->getWindowsize(), settings->getShow());
-	
-	writer->saveImage(image_maximum, "maximum.png", true);
-
 ////////Find contours
-	std::vector<std::vector<Point> > contours;
-	std::vector<cv::Rect> bounds;
-	
-	cv::Mat contourImage = findContours(settings->getOutputFolder(), image_maximum, contours, bounds, settings->getMaxThreshold(), settings->getContourMinArea(), settings->getShow());
-	writer->saveImage(contourImage, "contours.png");
+	ContourDetection * detector = new ContourDetection(cache, settings);
+	std::vector<Contour *> contours;
+
+	detector->generateMaxMap();
+	writer->saveImage(*detector->getMaxImage(), "maximum.png", true);
+
+	detector->findContours(contours);
+	delete detector;
 
 ////////Find best depth for contour
-	std::vector<int> depths_contour;
-	std::vector<double> val_contour;
-
-	depths_contour.resize(contours.size());
-	val_contour.resize(contours.size());
-	setContourDepth(settings, cache, bounds, depths_contour, val_contour, settings->getMinDepth(), settings->getMaxDepth(), settings->getStepSize());
+	ContourDepthDetection * depthdetector = new ContourDepthDetection(cache, settings);
+	for (int i = 0; i < contours.size(); i++)
+		depthdetector->findBestDepth(contours[i], settings->getMinDepth(), settings->getMaxDepth(), settings->getStepSize());
+	delete depthdetector;
 
 //merge bounds
-	if (settings->getDoMergebounds()){
+	/*if (settings->getDoMergebounds()){
 		while (mergebounds(bounds, depths_contour, val_contour, settings->getMergeThresholdDepth(), settings->getMergeThresholdDist(), settings->getStepSize()));
 
 		RNG rng(12345);
@@ -303,21 +162,21 @@ int main(int argc, char** argv)
 			cvWaitKey(1);
 			destroyWindow("Contours");
 		}
-	}
+	}*/
 
 ///////Refine depths
 	if (settings->getDoRefine() && settings->getOnline())
 	{ 
-		for (size_t c = 0; c < bounds.size(); c++)
-		{
-			setContourDepth(settings, cache, bounds, depths_contour, val_contour, depths_contour[c] - settings->getStepSize(), depths_contour[c] + settings->getStepSize(), settings->getStepSize() / 10, c);
-		}
+		ContourDepthDetection * depthdetector = new ContourDepthDetection(cache, settings);
+		for (int i = 0; i < contours.size(); i++)
+			depthdetector->findBestDepth(contours[i], contours[i]->getDepth() - settings->getStepSize(), contours[i]->getDepth() + settings->getStepSize(), settings->getStepSize() / 10.0);
+		delete depthdetector;
 	}
 
 ////////Create Report
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	writer->writeXMLReport(bounds, depths_contour, val_contour, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());
-	writer->saveROIImages(cache, bounds, depths_contour);
+	writer->writeXMLReport(contours, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());
+	writer->saveROIImages(cache, contours);
 
 ////////Cleanup
 	delete cache->getImageSource();

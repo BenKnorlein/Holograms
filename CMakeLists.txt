@@ -66,6 +66,9 @@ SET(HEADERS
 	src/ReportWriter.h
 	src/tinyxml2.h
 	src/Settings.h
+	src/ContourDepthDetection.h
+	src/ContourDetection.h
+	src/Contour.h
 )
 
 SET(SOURCES
@@ -76,6 +79,9 @@ SET(SOURCES
 	src/ReportWriter.cpp
 	src/tinyxml2.cpp
 	src/Settings.cpp
+	src/ContourDepthDetection.cpp
+	src/ContourDetection.cpp
+	src/Contour.cpp
 )
 
 SOURCE_GROUP(_CORE FILES ${HEADERS} ${SOURCES} )
