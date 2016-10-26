@@ -3,9 +3,11 @@
 ///\date 11/13/2016
 
 #include "ReportWriter.h"
+#include "Settings.h"
 #include <iostream>
 #include <fstream>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/photo.hpp>
 
 ReportWriter::ReportWriter(std::string outdir, std::string filename, std::string templateFolder) : m_outdir(outdir + "/" + filename), m_filename(filename), m_templateFolder(templateFolder)
 {
@@ -129,6 +131,24 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 		normalize(roi, image_display, 0, 255, CV_MINMAX);
 		image_display.convertTo(drawing, CV_8U);
 
+		//if (1)
+		//{
+		//	cv::Mat rgb_mat;
+		//	image_display.convertTo(rgb_mat, CV_GRAY2RGB);
+		//	cv::Point2d center = contours[c]->getPCACenter() - cv::Point2d(bound_cont.x, bound_cont.y);
+		//	cv::Point2d p1a = center + contours[c]->getPCAAxis()[0];
+		//	cv::Point2d p1b = center - contours[c]->getPCAAxis()[0];
+		//	cv::Point2d p2a = center + contours[c]->getPCAAxis()[1];
+		//	cv::Point2d p2b = center - contours[c]->getPCAAxis()[1];
+		//	cv::line(rgb_mat, p1a, p1b, cv::Scalar(0, 255, 0), 1, CV_AA);
+		//	cv::line(rgb_mat, p2a, p2b, cv::Scalar(255, 0,255), 1, CV_AA);
+		//	cv::imwrite(m_outdir + "/" + "contoursAxis_" + std::to_string(((long long)c)) + ".png", rgb_mat);
+
+		//	cv::Mat rgb_mask;
+		//	image_display.convertTo(rgb_mat, CV_GRAY2RGB);
+		//}
+
+
 		cv::imwrite(m_outdir + "/" + "contours_" + std::to_string(((long long)c)) + ".png", drawing);
 	}
 }
@@ -147,4 +167,27 @@ void ReportWriter::saveImage(cv::Mat image, std::string filename, bool normalize
 	{
 		imwrite(m_outdir + "/" + filename, image);
 	}
+}
+
+void ReportWriter::saveContourImage(std::vector<Contour*> contours, Settings * settings)
+{
+	cv::RNG rng(12345);
+	cv::Mat drawing = cv::Mat::zeros(cv::Size(settings->getWidth(), settings->getHeight()), CV_8UC3);
+	for (int i = 0; i< contours.size(); i++)
+	{
+		cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+
+		for (std::vector<cv::Point>::iterator it = contours[i]->getPoints()->begin(); it < contours[i]->getPoints()->end(); ++it)
+		{
+			drawing.at<cv::Vec3b>(it->y, it->x)[0] = color[0];
+			drawing.at<cv::Vec3b>(it->y, it->x)[1] = color[1];
+			drawing.at<cv::Vec3b>(it->y, it->x)[2] = color[2]; 
+		}
+
+		rectangle(drawing, contours[i]->getBoundingBox().tl(), contours[i]->getBoundingBox().br(), color, 2, 8, 0);
+		putText(drawing, std::to_string(((long long)i)), contours[i]->getBoundingBox().br(),
+		cv::FONT_HERSHEY_COMPLEX_SMALL, 2, color, 1, CV_AA);
+	}
+
+	saveImage(drawing, "contours.png");
 }

@@ -6,7 +6,6 @@
 #define CONTOURMERGE_H
 
 #include <string>
-#include "ImageCache.h"
 #include "Settings.h"
 #include "Contour.h"
 
@@ -15,12 +14,15 @@
 
 class ContourMerge {
 public:
-	ContourMerge(ImageCache * cache, Settings * settings);
+	ContourMerge(Settings * settings);
 	~ContourMerge();
 
+	int mergeContours(std::vector<Contour*> &contours);
 
 private:
-
+	bool DoBoxesIntersect(int merge_threshold_dist, cv::Rect a, cv::Rect b);
+	bool mergebounds(std::vector<Contour*> &contours);
+	Settings* m_settings;
 };
 
-#endif //CONTOURDETECTION_H
+#endif //CONTOURMERGE_H

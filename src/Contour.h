@@ -21,9 +21,15 @@ public:
 	int getDepth();
 	cv::Rect getBoundingBox();
 	cv::Mat * getMask();
+	std::vector <cv::Point>* getPoints();
+	cv::Moments getMoments();
+	cv::Point2d getPCACenter();
+	cv::Point2d* getPCAAxis();
+
+	void merge(Contour* contour, int stepsize);
 
 private:
-	std::vector<std::vector<cv::Point> > m_contourPoints;
+	
 	std::vector <cv::Point> m_pointsMask;
 	cv::Mat m_mask;
 	int m_depth;
@@ -39,7 +45,8 @@ private:
 
 	void initMask(std::vector<cv::Point> contourPoints);
 	void updateAll();
-	void updateMaskPoints();
+	void setPointsFromMask();
+	void setMaskFromPoints();
 	void updateBoundingBox();
 	void updateAlignedBoundingBox();
 	void updateMoments();

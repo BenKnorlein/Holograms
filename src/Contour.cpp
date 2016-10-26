@@ -11,6 +11,7 @@
 Contour::Contour(std::vector<cv::Point> contourPoints)
 {
 	initMask(contourPoints);
+	setPointsFromMask();
 	updateAll();
 }
 
@@ -45,20 +46,53 @@ cv::Rect Contour::getBoundingBox()
 	return m_boundingbox;
 }
 
+std::vector<cv::Point>* Contour::getPoints()
+{
+	return &m_pointsMask;
+}
+
+cv::Moments Contour::getMoments()
+{
+	return m_moments;
+}
+
+cv::Point2d Contour::getPCACenter()
+{
+	return m_pca_center;
+}
+
+cv::Point2d* Contour::getPCAAxis()
+{
+	return &m_pca_axis[0];
+}
+
 cv::Mat* Contour::getMask()
 {
 	return &m_mask;
 }
 
+void Contour::merge(Contour* contour, int stepsize)
+{
+	for (std::vector<cv::Point>::iterator pt = contour->getPoints()->begin(); pt < contour->getPoints()->end(); ++pt)
+		m_pointsMask.push_back(*pt);
+
+	setMaskFromPoints();
+	updateAll();
+
+	m_depth = ((m_depth + getDepth()) * 0.5 / stepsize + 0.5);
+	m_depth *= stepsize;
+	m_value = (m_value * m_moments.m00 + contour->getValue() * getMoments().m00) / (m_moments.m00 + getMoments().m00);
+}
+
 void Contour::updateAll()
 {
-	updateMaskPoints();
 	updateBoundingBox();
 	updateAlignedBoundingBox();
 	updateMoments();
+	updatePrincipalAxis();
 }
 
-void Contour::updateMaskPoints()
+void Contour::setPointsFromMask()
 {
 	m_pointsMask.clear();
 	cv::findNonZero(m_mask, m_pointsMask);
@@ -68,8 +102,19 @@ void Contour::updateMaskPoints()
 	}
 }
 
+void Contour::setMaskFromPoints()
+{
+	updateBoundingBox();
+	m_mask = cv::Mat::zeros(m_boundingbox.size(), CV_8UC1);
+	for (std::vector<cv::Point>::iterator it = m_pointsMask.begin(); it < m_pointsMask.end(); ++it)
+	{
+		m_mask.at<uchar>(it->y - m_boundingbox.y, it->x - m_boundingbox.x) = 255;
+	}
+}
+
 void Contour::initMask(std::vector<cv::Point> contourPoints)
 {
+	std::vector<std::vector<cv::Point> > m_contourPoints;
 	std::vector<cv::Point> m_contourPoints_tmp;
 	m_contourPoints_tmp.swap(contourPoints);
 	m_contourPoints.push_back(m_contourPoints_tmp);
@@ -143,8 +188,8 @@ void Contour::updatePrincipalAxis()
 	for (int i = 0; i < 2; ++i)
 	{
 		cv::Point2d eigen_vec = cv::Point2d(pca_analysis.eigenvectors.at<double>(i, 0), pca_analysis.eigenvectors.at<double>(i, 1));
-		double eigen_val = sqrt(pca_analysis.eigenvalues.at<double>(0, i));
-		m_pca_axis[i] = cv::Point2d(eigen_vec.x * eigen_val, eigen_vec.y * eigen_val);
+		double eigen_val = sqrt(pca_analysis.eigenvalues.at<double>(i, 0));
+		m_pca_axis[i] = cv::Point2d(eigen_vec.x * eigen_val*eigen_val, eigen_vec.y * eigen_val*eigen_val);
 	}
 }
 
