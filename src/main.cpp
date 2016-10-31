@@ -98,7 +98,6 @@ int main(int argc, char** argv)
 			ContourMerge * merger = new ContourMerge(settings);
 			count = merger->mergeContours(contours);
 			delete merger;
-
 			//find best depth for contours if a merge occured
 			if (count > 0){
 				ContourDepthDetection * depthdetector = new ContourDepthDetection(cache, settings);
@@ -112,7 +111,7 @@ int main(int argc, char** argv)
 
 ///////Refine depths
 	if (settings->getDoRefine() && settings->getOnline())
-	{ 
+	{
 		ContourDepthDetection * depthdetector = new ContourDepthDetection(cache, settings);
 		for (int i = 0; i < contours.size(); i++)
 			depthdetector->findBestDepth(contours[i], contours[i]->getDepth() - settings->getStepSize(), contours[i]->getDepth() + settings->getStepSize(), settings->getStepSize() / 10.0);
@@ -120,14 +119,22 @@ int main(int argc, char** argv)
 	}
 
 ////////Create Report
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+std::err << "a";		
+std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+std::err << "b";
 	writer->writeXMLReport(contours, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());
+std::err << "c";
 	writer->saveROIImages(cache, contours);
+std::err << "d";
 	writer->saveContourImage(contours, settings);
+std::err << "e";
 ////////Cleanup
 	delete cache->getImageSource();
+std::err << "f";
 	delete cache;
+std::err << "g";
 	delete writer;
+std::err << "h";
 	return 0;
 }
 

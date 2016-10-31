@@ -62,6 +62,8 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 	{
 		outfile << "<ROI>" << std::endl;
 		outfile << "<CONTOUR>" << c << "</CONTOUR>" << std::endl;
+		
+		// TODO convert pixels to real units
 		outfile << "<X>" << (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).x * 0.5 << "</X>" << std::endl;
 		outfile << "<Y>" << (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).y * 0.5 << "</Y>" << std::endl;
 		outfile << "<WIDTH>" << contours[c]->getBoundingBox().width << "</WIDTH>" << std::endl;

@@ -23,7 +23,7 @@
 	<max_threshold>0.35</max_threshold>
 	<contour_minArea>10.0</contour_minArea>
 
-	<doMergebounds>1</doMergebounds>
+	<doMergebounds>0</doMergebounds>
 	<merge_threshold_depth>400</merge_threshold_depth>
 	<merge_threshold_dist>50</merge_threshold_dist>
 </Settings>
