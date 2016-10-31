@@ -1,10 +1,10 @@
 <Settings>
-	<datafolder>C:/Holograms</datafolder>
-	<outputFolder>H:/offline_holograms</outputFolder>
+	<datafolder>/users/cavedemo/data/hologram-data/Holograms</datafolder>
+	<outputFolder>./offline_holograms</outputFolder>
 	<templateFolder></templateFolder>
 	
-	<online>0</online>
-	<ip>10.12.160.99</ip>
+	<online>1</online>
+	<ip>172.20.160.24</ip>
 	<port>1975</port>
 	
 	<show>1</show>

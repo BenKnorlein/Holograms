@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 #ifdef _MSC_VER
 	CreateDirectory(outFile.c_str(), NULL);
 #else
-	mkdir(outputFolder.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	mkdir(settings->getOutputFolder().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #endif
 
 	//setup ReportWriter
@@ -99,11 +99,12 @@ int main(int argc, char** argv)
 			count = merger->mergeContours(contours);
 			delete merger;
 
-			//find best depth for contoursif a merge occured
+			//find best depth for contours if a merge occured
 			if (count > 0){
 				ContourDepthDetection * depthdetector = new ContourDepthDetection(cache, settings);
-				for (int i = 0; i < contours.size(); i++)
+				for (int i = 0; i < contours.size(); i++) {
 					depthdetector->findBestDepth(contours[i], settings->getMinDepth(), settings->getMaxDepth(), settings->getStepSize());
+				}
 				delete depthdetector;
 			}
 		}

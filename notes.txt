@@ -1,0 +1,28 @@
+[Error] 10/28/16 ==========================================
+While connecting to Octopus, quickly running into this error:
+	Maximum 3000
+	Maximum 3100
+	REPLY:TREAM_RECONSTRUCTION 2048 2048 EN_581_cast_7__15-Jun-2016_01-07-15-590.bmp  3100 216777216
+	:vs XPCT:STREAM_RECONSTRUCTION 2048 2048 EN_581_cast_7__15-Jun-2016_01-07-15-590.bmp  3100 216777216
+
+	Holograms: /gpfs/home/sweitzma/data/sweitzma/repos/Holograms/src/OctopusClient.cpp:105: void OctopusClient::receiveImageData(int, float*): Assertion `reply == expectedReply' failed.
+	Aborted (core dumped)
+
+seems like the first letter of the message is being lost and is causing the program to crash,
+needs to be fixed in order to run consistently. tried to fix it with a hacky way, helped but did not fix
+
+see debug.txt
+
+
+
+
+
+[Note] 10/28/16 ============================================
+To run:
+  $ ./Holograms <hologram file name> <path to Settings.cml>
+
+  EXAMPLE
+  $ ./Holograms EN_581_cast_7__15-Jun-2016_01-07-15-590.bmp ./../../Settings.xml
+
+Note that if you want a hologram in a different folder, go into the
+Settings.xml file and change the datafolder field to the new directory
