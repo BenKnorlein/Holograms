@@ -57,11 +57,12 @@ int main(int argc, char** argv)
 #ifdef _MSC_VER
 	CreateDirectory(outFile.c_str(), NULL);
 #else
-	mkdir(outputFolder.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	mkdir(outFile.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #endif
 
 	//setup ReportWriter
-	ReportWriter * writer = new ReportWriter(settings->getOutputFolder(), filename);
+	//ReportWriter * writer = new ReportWriter(settings->getOutputFolder(), filename);
+	ReportWriter *writer = new ReportWriter(settings, filename);
 	//setup ImageCache
 	ImageCache * cache;
 	if (settings->getOnline())
@@ -98,12 +99,12 @@ int main(int argc, char** argv)
 			ContourMerge * merger = new ContourMerge(settings);
 			count = merger->mergeContours(contours);
 			delete merger;
-
-			//find best depth for contoursif a merge occured
+			//find best depth for contours if a merge occured
 			if (count > 0){
 				ContourDepthDetection * depthdetector = new ContourDepthDetection(cache, settings);
-				for (int i = 0; i < contours.size(); i++)
+				for (int i = 0; i < contours.size(); i++) {
 					depthdetector->findBestDepth(contours[i], settings->getMinDepth(), settings->getMaxDepth(), settings->getStepSize());
+				}
 				delete depthdetector;
 			}
 		}
@@ -111,7 +112,7 @@ int main(int argc, char** argv)
 
 ///////Refine depths
 	if (settings->getDoRefine() && settings->getOnline())
-	{ 
+	{
 		ContourDepthDetection * depthdetector = new ContourDepthDetection(cache, settings);
 		for (int i = 0; i < contours.size(); i++)
 			depthdetector->findBestDepth(contours[i], contours[i]->getDepth() - settings->getStepSize(), contours[i]->getDepth() + settings->getStepSize(), settings->getStepSize() / 10.0);
@@ -124,6 +125,7 @@ int main(int argc, char** argv)
 	writer->saveROIImages(cache, contours);
 	writer->saveContourImage(contours, settings);
 ////////Cleanup
+	delete settings;
 	delete cache->getImageSource();
 	delete cache;
 	delete writer;

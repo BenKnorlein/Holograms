@@ -193,3 +193,8 @@ void Contour::updatePrincipalAxis()
 	}
 }
 
+int Contour::getArea() {
+	return m_pointsMask.size();
+}
+
+

@@ -27,6 +27,7 @@ public:
 	cv::Point2d* getPCAAxis();
 
 	void merge(Contour* contour, int stepsize);
+	int getArea();
 
 private:
 	

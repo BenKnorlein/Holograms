@@ -113,6 +113,16 @@ public:
 		return merge_threshold_dist;
 	}
 
+	const int& getScreenToSource() const
+	{
+		return screen_to_source;
+	}
+
+	const int& getPixelSize() const
+	{
+		return pixel_size;
+	}
+
 protected:
 
 protected:
@@ -153,6 +163,10 @@ protected:
 	bool doMergebounds;
 	float merge_threshold_depth;
 	float merge_threshold_dist;
+
+	//pixel to real units conversion settings
+	int screen_to_source;
+	int pixel_size;
 };
 
 #endif //SETTINGS_H

@@ -1,10 +1,10 @@
 <Settings>
-	<datafolder>C:/Holograms</datafolder>
-	<outputFolder>H:/offline_holograms</outputFolder>
+	<datafolder>/users/cavedemo/data/hologram-data/offline</datafolder>
+	<outputFolder>offline_holograms</outputFolder>
 	<templateFolder></templateFolder>
 	
 	<online>0</online>
-	<ip>10.12.160.99</ip>
+	<ip>172.20.160.24</ip>
 	<port>1975</port>
 	
 	<show>1</show>
@@ -26,4 +26,7 @@
 	<doMergebounds>1</doMergebounds>
 	<merge_threshold_depth>400</merge_threshold_depth>
 	<merge_threshold_dist>50</merge_threshold_dist>
+
+	<screen_to_source>500</screen_to_source>
+	<pixel_size>5</pixel_size>
 </Settings>

@@ -39,6 +39,10 @@ Settings::Settings(const char* filename)
 	merge_threshold_depth = 400;
 	merge_threshold_dist = 50;
 
+	//pixel to real units conversion settings
+	screen_to_source = 1;
+	pixel_size = 1;
+
 	tinyxml2::XMLDocument doc;
 	doc.LoadFile(filename);
 
@@ -162,6 +166,18 @@ Settings::Settings(const char* filename)
 	if (titleElement) {
 		merge_threshold_dist = std::stoi(std::string(titleElement->GetText()));
 		std::cerr << "merge_threshold_dist = " << merge_threshold_dist << std::endl;
+	}
+
+	titleElement = doc.FirstChildElement("Settings")->FirstChildElement("screen_to_source");
+	if (titleElement) {
+		screen_to_source = std::stoi(std::string(titleElement->GetText()));
+		std::cerr << "screen_to_source = " << screen_to_source << std::endl;
+	}
+
+	titleElement = doc.FirstChildElement("Settings")->FirstChildElement("pixel_size");
+	if (titleElement) {
+		pixel_size = std::stoi(std::string(titleElement->GetText()));
+		std::cerr << "pixel_size = " << pixel_size << std::endl;
 	}
 }
 

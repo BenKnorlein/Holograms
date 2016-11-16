@@ -9,10 +9,15 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/photo.hpp>
 
-ReportWriter::ReportWriter(std::string outdir, std::string filename, std::string templateFolder) : m_outdir(outdir + "/" + filename), m_filename(filename), m_templateFolder(templateFolder)
+ReportWriter::ReportWriter(Settings *settings, std::string filename)
 {
-	
-
+	m_outdir = settings->getOutputFolder() + "/" + filename;
+	m_filename = filename;
+	m_templateFolder = settings->getTemplateFolder();
+	m_pixel_size = settings->getPixelSize();
+	m_screen_to_source = settings->getScreenToSource();
+	m_width = settings->getWidth();
+	m_height = settings->getHeight();
 }
 
 ReportWriter::~ReportWriter()
@@ -60,13 +65,37 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 
 	for (size_t c = 0; c < contours.size(); c++)
 	{
+		float x_pixel = (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).x * 0.5;
+		float y_pixel = (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).y * 0.5;
+		int width_pixel = contours[c]->getBoundingBox().width;
+		int height_pixel = contours[c]->getBoundingBox().height;
+		int area_pixel = contours[c]->getArea();
+		int depth = contours[c]->getDepth();
+		float scalar = reconPixelSize(depth);
+		float x = (x_pixel - m_width * 0.5) * scalar;
+		float y = (y_pixel - m_width * 0.5) * scalar;
+		float width = width_pixel * scalar;
+		float height = height_pixel * scalar;
+		float area = area_pixel * scalar * scalar;
+
 		outfile << "<ROI>" << std::endl;
 		outfile << "<CONTOUR>" << c << "</CONTOUR>" << std::endl;
-		outfile << "<X>" << (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).x * 0.5 << "</X>" << std::endl;
-		outfile << "<Y>" << (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).y * 0.5 << "</Y>" << std::endl;
-		outfile << "<WIDTH>" << contours[c]->getBoundingBox().width << "</WIDTH>" << std::endl;
-		outfile << "<HEIGHT>" << contours[c]->getBoundingBox().height << "</HEIGHT>" << std::endl;
-		outfile << "<DEPTH>" << contours[c]->getDepth() << "</DEPTH>" << std::endl;
+		
+		outfile << "<X_PIXEL>" << x_pixel << "</X_PIXEL>" << std::endl;
+		outfile << "<X>" << x << "</X>" << std::endl;
+		outfile << "<Y_PIXEL>" << y_pixel << "</Y_PIXEL>" << std::endl;
+		outfile << "<Y>" << y << "</Y>" << std::endl;
+		
+		outfile << "<WIDTH_PIXEL>" << width_pixel << "</WIDTH_PIXEL>" << std::endl;
+		outfile << "<WIDTH>" << width << "</WIDTH>" << std::endl;
+		outfile << "<HEIGHT_PIXEL>" << height_pixel << "</HEIGHT_PIXEL>" << std::endl;
+		outfile << "<HEIGHT>" << height << "</HEIGHT>" << std::endl;
+		
+		outfile << "<DEPTH>" << depth  << "</DEPTH>" << std::endl;
+		
+		outfile << "<AREA_PIXEL>" << area_pixel << "</AREA_PIXEL>" << std::endl;
+		outfile << "<AREA>" << area << "</AREA>" << std::endl;
+		
 		outfile << "<VAL>" << contours[c]->getValue() << "</VAL>" << std::endl;
 		outfile << "<IMAGE>" << "contours_" + std::to_string(((long long)c)) + ".png" << "</IMAGE>" << std::endl;
 		outfile << "<IMAGEPHASE>" << "contoursPhase_" + std::to_string(((long long)c)) + ".png" << "</IMAGEPHASE>" << std::endl;
@@ -76,6 +105,29 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 	outfile << "</doc>" << std::endl;
 
 	outfile.close();
+}
+
+std::string type2str(int type) {
+  std::string r;
+
+  uchar depth = type & CV_MAT_DEPTH_MASK;
+  uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+  switch ( depth ) {
+    case CV_8U:  r = "8U"; break;
+    case CV_8S:  r = "8S"; break;
+    case CV_16U: r = "16U"; break;
+    case CV_16S: r = "16S"; break;
+    case CV_32S: r = "32S"; break;
+    case CV_32F: r = "32F"; break;
+    case CV_64F: r = "64F"; break;
+    default:     r = "User"; break;
+  }
+
+  r += "C";
+  r += (chans+'0');
+
+  return r;
 }
 
 void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contours)
@@ -111,15 +163,19 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 	{
 		std::cout << "Save Contour " << c << " at depth " << std::to_string(((long long)contours[c]->getDepth())) << std::endl;
 		int d = contours[c]->getDepth();
-		cv::Mat *image = cache->getAmplitudeImage(d);
 
-		cv::Rect bound_cont = contours[c]->getBoundingBox();
+		cv::Mat *image = cache->getAmplitudeImage(d);
+		cv::Mat *mask = contours[c]->getMask();
+
+		cv::Rect bound_orig = contours[c]->getBoundingBox();
+		cv::Rect bound_cont = cv::Rect(bound_orig.tl(), bound_orig.br());
+		
 		bound_cont.x = bound_cont.x - 20;
 		bound_cont.y = bound_cont.y - 20;
 		bound_cont.width = bound_cont.width + 40;
 		bound_cont.height = bound_cont.height + 40;
-
-		if (bound_cont.x < 0) bound_cont.x = 0;
+		
+		if (bound_cont.x < 0)bound_cont.x = 0;
 		if (bound_cont.y < 0) bound_cont.y = 0;
 		if (bound_cont.y + bound_cont.height > image->rows) bound_cont.height = image->rows - bound_cont.y;
 		if (bound_cont.x + bound_cont.width > image->cols) bound_cont.width = image->cols - bound_cont.x;
@@ -130,6 +186,11 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 		cv::Mat drawing;
 		normalize(roi, image_display, 0, 255, CV_MINMAX);
 		image_display.convertTo(drawing, CV_8U);
+
+		cv::Mat id_mask;
+		cv::Mat d_mask;
+		normalize(*mask, id_mask, 0, 255, CV_MINMAX);
+		id_mask.convertTo(d_mask, CV_8U);
 
 		//if (1)
 		//{
@@ -147,8 +208,36 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 		//	cv::Mat rgb_mask;
 		//	image_display.convertTo(rgb_mat, CV_GRAY2RGB);
 		//}
+		
+		if (1)
+		{
+			cv::Mat m = cv::Mat::zeros(bound_cont.height, bound_cont.width, CV_8UC3);
+			for (int row = 0; row < m.rows; row++) {
+				for (int col = 0; col < m.cols; col++) {
+					unsigned char d = drawing.at<unsigned char>(row, col) ;
 
-
+					cv::Vec3b pixel;
+					pixel[0] = d;
+					pixel[1] = d;
+					pixel[2] = d;
+					
+					cv::Point p = cv::Point(col, row) + bound_cont.tl();
+					if (!bound_orig.contains(p)) {
+						pixel[2] = 255;
+					} else {
+						cv::Point p2 = bound_orig.tl() - bound_cont.tl();	
+						unsigned char d2 = d_mask.at<unsigned char>(row - p2.y, col - p2.x);
+						if (d2 == 0) pixel[2] = 255;
+					}
+					
+					m.at<cv::Vec3b>(row, col) = pixel;
+				}
+			} 
+					
+			cv::imwrite(m_outdir + "/" + "contoursTest_" + std::to_string(((long long)c)) + ".png", m);
+		}
+		
+		
 		cv::imwrite(m_outdir + "/" + "contours_" + std::to_string(((long long)c)) + ".png", drawing);
 	}
 }
@@ -191,3 +280,13 @@ void ReportWriter::saveContourImage(std::vector<Contour*> contours, Settings * s
 
 	saveImage(drawing, "contours.png");
 }
+
+
+float ReportWriter::reconPixelSize(int depth)
+{
+	return (float) depth / m_screen_to_source * m_pixel_size;
+}
+
+
+
+

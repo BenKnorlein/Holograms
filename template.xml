@@ -36,6 +36,7 @@ id ID #REQUIRED>
 		  <th>Width</th>
 		  <th>Height</th>
 		  <th>Depth</th>
+		  <th>Area</th>
 		  <th>Image</th>
       <th>Phase</th>
 		</tr>
@@ -47,6 +48,7 @@ id ID #REQUIRED>
 		  <td><xsl:value-of select="WIDTH"/></td>
 		  <td><xsl:value-of select="HEIGHT"/></td>
 		  <td><xsl:value-of select="DEPTH"/></td>
+		  <td><xsl:value-of select="AREA"/></td>
 		  <td>
 			<img>
 				<xsl:attribute name="src">

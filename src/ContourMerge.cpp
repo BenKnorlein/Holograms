@@ -50,7 +50,6 @@ bool ContourMerge::mergebounds(std::vector<Contour*> &contours)
 				&& abs(contours[c]->getDepth() - contours[k]->getDepth()) <= m_settings->getMergeThresholdDepth())
 			{
 				contours[c]->merge(contours[k], m_settings->getStepSize());
-
 				std::cerr << "Intersect " << c << " " << k << std::endl;
 
 				contours.erase(contours.begin() + k);
