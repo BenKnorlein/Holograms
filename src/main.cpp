@@ -61,7 +61,8 @@ int main(int argc, char** argv)
 #endif
 
 	//setup ReportWriter
-	ReportWriter * writer = new ReportWriter(settings->getOutputFolder(), filename);
+	//ReportWriter * writer = new ReportWriter(settings->getOutputFolder(), filename);
+	ReportWriter *writer = new ReportWriter(settings, filename);
 	//setup ImageCache
 	ImageCache * cache;
 	if (settings->getOnline())
@@ -119,11 +120,12 @@ int main(int argc, char** argv)
 	}
 
 ////////Create Report
-std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	writer->writeXMLReport(contours, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());
 	writer->saveROIImages(cache, contours);
 	writer->saveContourImage(contours, settings);
 ////////Cleanup
+	delete settings;
 	delete cache->getImageSource();
 	delete cache;
 	delete writer;

@@ -41,7 +41,7 @@ Settings::Settings(const char* filename)
 
 	//pixel to real units conversion settings
 	screen_to_source = 1;
-	m_pixelSize = 1;
+	pixel_size = 1;
 
 	tinyxml2::XMLDocument doc;
 	doc.LoadFile(filename);
@@ -174,10 +174,10 @@ Settings::Settings(const char* filename)
 		std::cerr << "screen_to_source = " << screen_to_source << std::endl;
 	}
 
-	titleElement = doc.FirstChildElement("Settings")->FirstChildElement("m_pixelSize");
+	titleElement = doc.FirstChildElement("Settings")->FirstChildElement("pixel_size");
 	if (titleElement) {
-		m_pixelSize = std::stoi(std::string(titleElement->GetText()));
-		std::cerr << "m_pixelSize = " << m_pixelSize << std::endl;
+		pixel_size = std::stoi(std::string(titleElement->GetText()));
+		std::cerr << "pixel_size = " << pixel_size << std::endl;
 	}
 }
 

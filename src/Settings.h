@@ -118,9 +118,9 @@ public:
 		return screen_to_source;
 	}
 
-	const int& getMPixelSize() const
+	const int& getPixelSize() const
 	{
-		return m_pixelSize;
+		return pixel_size;
 	}
 
 protected:
@@ -166,7 +166,7 @@ protected:
 
 	//pixel to real units conversion settings
 	int screen_to_source;
-	int m_pixelSize;
+	int pixel_size;
 };
 
 #endif //SETTINGS_H
