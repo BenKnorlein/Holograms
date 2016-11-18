@@ -192,23 +192,6 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 		normalize(*mask, id_mask, 0, 255, CV_MINMAX);
 		id_mask.convertTo(d_mask, CV_8U);
 
-		//if (1)
-		//{
-		//	cv::Mat rgb_mat;
-		//	image_display.convertTo(rgb_mat, CV_GRAY2RGB);
-		//	cv::Point2d center = contours[c]->getPCACenter() - cv::Point2d(bound_cont.x, bound_cont.y);
-		//	cv::Point2d p1a = center + contours[c]->getPCAAxis()[0];
-		//	cv::Point2d p1b = center - contours[c]->getPCAAxis()[0];
-		//	cv::Point2d p2a = center + contours[c]->getPCAAxis()[1];
-		//	cv::Point2d p2b = center - contours[c]->getPCAAxis()[1];
-		//	cv::line(rgb_mat, p1a, p1b, cv::Scalar(0, 255, 0), 1, CV_AA);
-		//	cv::line(rgb_mat, p2a, p2b, cv::Scalar(255, 0,255), 1, CV_AA);
-		//	cv::imwrite(m_outdir + "/" + "contoursAxis_" + std::to_string(((long long)c)) + ".png", rgb_mat);
-
-		//	cv::Mat rgb_mask;
-		//	image_display.convertTo(rgb_mat, CV_GRAY2RGB);
-		//}
-		
 		if (1)
 		{
 			cv::Mat m = cv::Mat::zeros(bound_cont.height, bound_cont.width, CV_8UC3);
@@ -232,8 +215,16 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 					
 					m.at<cv::Vec3b>(row, col) = pixel;
 				}
-			} 
-					
+			}
+
+			cv::Point2d center = contours[c]->getPCACenter() - cv::Point2d(bound_cont.x, bound_cont.y);
+			cv::Point2d p1a = center + contours[c]->getPCAAxis()[0];
+			cv::Point2d p1b = center - contours[c]->getPCAAxis()[0];
+			cv::Point2d p2a = center + contours[c]->getPCAAxis()[1];
+			cv::Point2d p2b = center - contours[c]->getPCAAxis()[1];
+			cv::line(m, p1a, p1b, cv::Scalar(0, 255, 0), 1, CV_AA);
+			cv::line(m, p2a, p2b, cv::Scalar(255, 0, 0), 1, CV_AA);
+			
 			cv::imwrite(m_outdir + "/" + "contoursTest_" + std::to_string(((long long)c)) + ".png", m);
 		}
 		
