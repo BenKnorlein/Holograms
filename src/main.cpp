@@ -119,10 +119,11 @@ int main(int argc, char** argv)
 			depthdetector->findBestDepth(contours[i], contours[i]->getDepth() - settings->getStepSize(), contours[i]->getDepth() + settings->getStepSize(), settings->getStepSize() / 10.0);
 		delete depthdetector;
 	}
-	
-	PhaseExperiments *pe = new PhaseExperiments(outFile);
-	pe->randomContourPixels(contours[1], 5, 0, 0, 0);
-	pe->randomContourPixels(contours[3], 10, 0, 0, 0);
+
+////////Phase Experimetal Testing	
+	PhaseExperiments *pe = new PhaseExperiments(settings, cache, outFile);
+	pe->randomContourPixels(contours[1], 5, 10000, 12000, 100);
+	pe->randomContourPixels(contours[3], 10, 10000, 12000, 100);
 	
 ////////Create Report
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();

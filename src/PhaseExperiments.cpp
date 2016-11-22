@@ -4,8 +4,10 @@
 #include <fstream>
 
 // Constructor
-PhaseExperiments::PhaseExperiments(std::string outdir) 
+PhaseExperiments::PhaseExperiments(Settings *settings, ImageCache *cache, std::string outdir) 
 {
+	m_settings = settings;
+	m_cache = cache;
 	m_outdir = outdir;
 }
 
@@ -39,24 +41,41 @@ PhaseExperiments::~PhaseExperiments() {}
  *   void
  *
  * TODO
- *   [+] finish the rough version of the method
+ *   [+] add absolute value based off settings
+ *   [+] maybe normalize floating point values
+ *   [+] change from .txt -> .csv format so it can be graphed
+ *   [+] check performance online with smaller steps
  */
 void PhaseExperiments::randomContourPixels(Contour *c, int samples, int start_depth, int stop_depth, int step) {
 	int n = c->getArea();
+	
+	/**
+         * only inspect at most the number of pixels
+         * that are in the contour
+         */
 	if (samples > n) {
 		samples = n;
 	}
 	
 	std::vector<int> indexes(samples);
-	std::vector<cv::Point> & pointsRef = *c->getPoints();	
 	cv::randu(indexes, 0, n);	
 	
 	std::ofstream out;
 	out.open(m_outdir + "/" + "phaseTesting_" + std::to_string(((long long)c))  + ".txt");
-
+	
+	std::vector<cv::Point> & pointsRef = *c->getPoints();	
+	
 	for (int i : indexes) {
 		cv::Point p = pointsRef[i];
 		out << "(" << p.x << ", " << p.y << ")\n";
+	
+		for (int d = start_depth; d <= stop_depth; d += step)
+		{
+			// check if this is right
+			float value = m_cache->getPhaseImage(d)->at<float>(p.x, p.y);
+
+			out << "  Depth: " << d << "  Value: " << value << std::endl; 
+		}
 	}
 	
 	out.close();
