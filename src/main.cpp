@@ -10,6 +10,7 @@
 #include "ReportWriter.h"
 #include "Settings.h"
 #include "ContourDetection.h"
+#include "PhaseExperiments.h"
 
 #include <iostream>
 
@@ -19,7 +20,7 @@
 #ifndef WITH_CONSOLE
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
-	#include <windows.h>
+#include <windows.h>
 #else
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -48,7 +49,7 @@ int main(int argc, char** argv)
 		std::cerr << "You need to provide a filename and a settings.xml" << std::endl;
 		return 0;
 	}
-
+#include <iostream>
 	std::string filename = std::string(argv[1]);
 	Settings * settings = new Settings(argv[2]);
 
@@ -118,12 +119,17 @@ int main(int argc, char** argv)
 			depthdetector->findBestDepth(contours[i], contours[i]->getDepth() - settings->getStepSize(), contours[i]->getDepth() + settings->getStepSize(), settings->getStepSize() / 10.0);
 		delete depthdetector;
 	}
-
+	
+	PhaseExperiments *pe = new PhaseExperiments(outFile);
+	pe->randomContourPixels(contours[1], 5, 0, 0, 0);
+	pe->randomContourPixels(contours[3], 10, 0, 0, 0);
+	
 ////////Create Report
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	writer->writeXMLReport(contours, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());
 	writer->saveROIImages(cache, contours);
 	writer->saveContourImage(contours, settings);
+
 ////////Cleanup
 	delete settings;
 	delete cache->getImageSource();

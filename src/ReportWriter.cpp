@@ -191,7 +191,17 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 		cv::Mat d_mask;
 		normalize(*mask, id_mask, 0, 255, CV_MINMAX);
 		id_mask.convertTo(d_mask, CV_8U);
-
+		
+		/* 
+ 		 * in this section below I create a new Mat that is BGR because we had trouble
+ 		 * converting the grayscale image directly to color.  I copy every pixel over
+ 		 * and tint any pixels that are not included in the contour.  Then I draw the 
+ 		 * two principle axes in green and blue and then save the image.  It is not
+ 		 * yet added to the report but could be. As of now it mostly serves as how to
+ 		 * create the image an draw on it. Once we discuss exactly what we want on the 
+ 		 * report I will chage it such that the reports contain the new and more useful
+ 		 * contour images.
+ 		 */
 		if (1)
 		{
 			cv::Mat m = cv::Mat::zeros(bound_cont.height, bound_cont.width, CV_8UC3);
