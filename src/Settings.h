@@ -123,6 +123,21 @@ public:
 		return pixel_size;
 	}
 
+	const int& getMaxImageCacheStorage() const
+	{
+		return maxImageCacheStorage;
+	}
+
+	const bool& getUseSharpness() const
+	{
+		return useSharpness;
+	}
+
+	const int& getMethodSharpness() const
+	{
+		return methodSharpness;
+	}
+
 protected:
 
 protected:
@@ -167,6 +182,13 @@ protected:
 	//pixel to real units conversion settings
 	int screen_to_source;
 	int pixel_size;
+
+	//ImageCache 
+	int maxImageCacheStorage;
+
+	//SharpnessProcessing
+	bool useSharpness;
+	int methodSharpness;
 };
 
 #endif //SETTINGS_H

@@ -15,8 +15,6 @@ ContourDetection::ContourDetection(ImageCache * cache, Settings * settings) : m_
 
 ContourDetection::~ContourDetection()
 {
-	
-
 }
 
 
@@ -34,18 +32,22 @@ void ContourDetection::generateMaxMap()
 	for (int d = m_settings->getMinDepth(); d <= m_settings->getMaxDepth(); d += m_settings->getStepSize()){
 		std::cout << "Maximum " << d << std::endl;
 
-		//filter image
-		cv::Mat kernel = cv::Mat(m_settings->getWindowsize(), m_settings->getWindowsize(), CV_32FC1, cv::Scalar::all(1.0 / (m_settings->getWindowsize()*m_settings->getWindowsize())));
 		cv::Mat image_tmp;
-		cv::filter2D(*m_cache->getPhaseImage(d), image_tmp, CV_32F, kernel);
-		if (m_settings->getUseAbs()) image_tmp = cv::abs(image_tmp);
-
+		cv::Mat kernel = cv::Mat(m_settings->getWindowsize(), m_settings->getWindowsize(), CV_32FC1, cv::Scalar::all(1.0 / (m_settings->getWindowsize()*m_settings->getWindowsize())));
+		if (!m_settings->getUseSharpness()){
+			//filter image
+			cv::filter2D(*m_cache->getPhaseImage(d), image_tmp, CV_32F, kernel);
+			if (m_settings->getUseAbs()) image_tmp = cv::abs(image_tmp);
+		} else
+		{
+			cv::filter2D(*m_cache->getGradientImage(d), image_tmp, CV_32F, kernel);
+		}
 		float* max_ptr = (float *)m_image_maximum.data;
 		float* image_ptr = (float *)image_tmp.data;
 
 		for (int i = 0; i < m_settings->getWidth() * m_settings->getHeight(); i++, max_ptr++, image_ptr++)
 		{
-			if (*max_ptr < *image_ptr && *image_ptr)
+			if (*max_ptr < *image_ptr)
 			{
 				*max_ptr = *image_ptr;
 			}

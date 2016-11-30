@@ -40,8 +40,13 @@ Settings::Settings(const char* filename)
 	merge_threshold_dist = 50;
 
 	//pixel to real units conversion settings
-	screen_to_source = 1;
-	pixel_size = 1;
+	screen_to_source = 100000;
+	pixel_size = 7.4;
+
+	maxImageCacheStorage = 500;
+
+	useSharpness = false;
+	methodSharpness = 2;
 
 	tinyxml2::XMLDocument doc;
 	doc.LoadFile(filename);
@@ -178,6 +183,24 @@ Settings::Settings(const char* filename)
 	if (titleElement) {
 		pixel_size = std::stoi(std::string(titleElement->GetText()));
 		std::cerr << "pixel_size = " << pixel_size << std::endl;
+	}
+
+	titleElement = doc.FirstChildElement("Settings")->FirstChildElement("maxImageCacheStorage");
+	if (titleElement) {
+		maxImageCacheStorage = std::stoi(std::string(titleElement->GetText()));
+		std::cerr << "maxImageCacheStorage = " << maxImageCacheStorage << std::endl;
+	}
+
+	titleElement = doc.FirstChildElement("Settings")->FirstChildElement("useSharpness");
+	if (titleElement) {
+		useSharpness = std::stoi(std::string(titleElement->GetText()));
+		std::cerr << "useSharpness = " << useSharpness << std::endl;
+	}
+
+	titleElement = doc.FirstChildElement("Settings")->FirstChildElement("methodSharpness");
+	if (titleElement) {
+		methodSharpness = std::stoi(std::string(titleElement->GetText()));
+		std::cerr << "methodSharpness = " << methodSharpness << std::endl;
 	}
 }
 
