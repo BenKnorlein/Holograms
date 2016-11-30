@@ -17,6 +17,7 @@ class PhaseExperiments {
 		void randomContourPixels(Contour *c, int samples, int start_depth, int stop_depth, int step);
 
 	private:
+		int call_num;
 		std::string m_outdir;
 		Settings *m_settings;
 		ImageCache *m_cache;

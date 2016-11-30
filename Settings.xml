@@ -1,9 +1,9 @@
 <Settings>
-	<datafolder>/users/cavedemo/data/holoyurt-data</datafolder>
-	<outputFolder>online_holograms</outputFolder>
+	<datafolder>/users/cavedemo/data/holoyurt-data/offline</datafolder>
+	<outputFolder>offline_holograms</outputFolder>
 	<templateFolder></templateFolder>
 	
-	<online>1</online>
+	<online>0</online>
 	<ip>172.20.160.24</ip>
 	<port>1975</port>
 	
