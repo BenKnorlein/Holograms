@@ -35,6 +35,9 @@ private:
 	int m_screen_to_source;
 	int m_width;
 	int m_height;
+
+	template <typename T>
+	cv::Mat plotGraph(std::vector<T>& vals, int YRange[2]);
 };
 
 #endif //REPORTWRITER_H

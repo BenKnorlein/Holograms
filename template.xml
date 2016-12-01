@@ -5,103 +5,121 @@
 id ID #REQUIRED>
 ]>
 <doc>
-<!--Start XSL-->
+	<!--Start XSL-->
 	<xsl:stylesheet  id="stylesheet" version="1.0" 
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-
-	<xsl:template match="/doc">
-	  <html>
-	  <body>
-    <h2>
-      <xsl:value-of select="DATA/FILENAME"/>
-    </h2>
-    <h2>
-        Processing time : <xsl:value-of select="DATA/TIME"/> minutes
-    </h2>
-    <img height="1024" width="1024">
-      <xsl:attribute name="src">
-        <xsl:value-of select="DATA/CONTOURIMAGE"/>
-      </xsl:attribute>
-    </img>
-      <img height="1024" width="1024">
-        <xsl:attribute name="src">
-          <xsl:value-of select="DATA/MAXIMAGE"/>
-        </xsl:attribute>
-      </img>
-	    <xsl:if test="QCDATA">
-	  <h3>
-		QC Data
-	  </h3>
-	  <table border="1">
-		<tr bgcolor="#9acd32">
-		  <th>Type</th>
-		  <th>X</th>
-		  <th>Y</th>
-		  <th>Major axis</th>
-		  <th>Minor axis</th>
-		  <th>Depth</th>
-		  <th>Image</th>
-		</tr>
-		<xsl:for-each select="QCDATA/ROI">
-		<tr>
-		  <td><xsl:value-of select="TYPE"/></td>
-		  <td><xsl:value-of select="X"/></td>
-		  <td><xsl:value-of select="Y"/></td>
-		  <td><xsl:value-of select="MAJORAXIS"/></td>
-		  <td><xsl:value-of select="MINORAXIS"/></td>
-		  <td><xsl:value-of select="DEPTH"/></td>
-		  <td>
-			<img>
-				<xsl:attribute name="src">
-					<xsl:value-of select="IMAGE"/>
-				</xsl:attribute>
-			</img>
-		  </td>
-		</tr>
-		</xsl:for-each>
-	  </table>
-	  </xsl:if>
-	  <h3>
-		Detected
-	  </h3>
-	  <table border="1">
-		<tr bgcolor="#9acd32">
-      <th>Contour</th>
-		  <th>X</th>
-		  <th>Y</th>
-		  <th>Width</th>
-		  <th>Height</th>
-		  <th>Depth</th>
-		  <th>Image</th>
-      <th>Phase</th>
-		</tr>
-		<xsl:for-each select="DATA/ROI">
-		<tr>
-      <td><xsl:value-of select="CONTOUR"/></td>
-		  <td><xsl:value-of select="X"/></td>
-		  <td><xsl:value-of select="Y"/></td>
-		  <td><xsl:value-of select="WIDTH"/></td>
-		  <td><xsl:value-of select="HEIGHT"/></td>
-		  <td><xsl:value-of select="DEPTH"/></td>
-		  <td>
-			<img>
-				<xsl:attribute name="src">
-					<xsl:value-of select="IMAGE"/>
-				</xsl:attribute>
-			</img>
-		  </td>
-      <td>
-        <img>
-          <xsl:attribute name="src">
-            <xsl:value-of select="IMAGEPHASE"/>
-          </xsl:attribute>
-        </img>
-      </td>
-		</tr>
-		</xsl:for-each>
-	  </table>
-	  </body>
-	  </html>
-	</xsl:template>
+		<xsl:template match="/doc">
+			<html>
+				<body>
+					<h2>
+						<xsl:value-of select="DATA/FILENAME"/>
+					</h2>
+					
+					<h2>
+					Processing time : <xsl:value-of select="DATA/TIME"/> minutes
+					</h2>
+					
+					<img height="1024" width="1024">
+						<xsl:attribute name="src">
+							<xsl:value-of select="DATA/CONTOURIMAGE"/>
+						</xsl:attribute>
+					</img>
+					
+					<img height="1024" width="1024">
+						<xsl:attribute name="src">
+							<xsl:value-of select="DATA/MAXIMAGE"/>
+						</xsl:attribute>
+					</img>
+					
+					<xsl:if test="QCDATA">
+						<h3>
+						QC Data
+						</h3>
+						<table border="1">
+							<tr bgcolor="#9acd32">
+								<th>Type</th>
+								<th>X</th>
+								<th>Y</th>
+								<th>Major axis</th>
+								<th>Minor axis</th>
+								<th>Depth</th>
+								<th>Image</th>
+							</tr>
+							<xsl:for-each select="QCDATA/ROI">
+								<tr>
+									<td><xsl:value-of select="TYPE"/></td>
+									<td><xsl:value-of select="X"/></td>
+									<td><xsl:value-of select="Y"/></td>
+									<td><xsl:value-of select="MAJORAXIS"/></td>
+									<td><xsl:value-of select="MINORAXIS"/></td>
+									<td><xsl:value-of select="DEPTH"/></td>
+									<td>
+										<img>
+											<xsl:attribute name="src">
+												<xsl:value-of select="IMAGE"/>
+											</xsl:attribute>
+										</img>
+									</td>
+								</tr>
+							</xsl:for-each>
+						</table>
+					</xsl:if>
+					
+					<h3>
+					Detected
+					</h3>
+					
+					<table border="1">
+						<tr bgcolor="#9acd32">
+							<th>Contour</th>
+							<th>X</th>
+							<th>Y</th>
+							<th>Width</th>
+							<th>Height</th>
+							<th>Depth</th>
+							<th>Image</th>
+							<th>Phase</th>
+							<th>Score</th>
+							<th>MaxScore</th>
+							<th>MinScore</th>
+						</tr>
+						<xsl:for-each select="DATA/ROI">
+							<tr>
+								<td><xsl:value-of select="CONTOUR"/></td>
+								<td><xsl:value-of select="X"/></td>
+								<td><xsl:value-of select="Y"/></td>
+								<td><xsl:value-of select="WIDTH"/></td>
+								<td><xsl:value-of select="HEIGHT"/></td>
+								<td><xsl:value-of select="DEPTH"/></td>
+								<td>
+									<img>
+										<xsl:attribute name="src">
+											<xsl:value-of select="IMAGE"/>
+										</xsl:attribute>
+									</img>
+								</td>
+								<td>
+									<img>
+										<xsl:attribute name="src">
+											<xsl:value-of select="IMAGEPHASE"/>
+										</xsl:attribute>
+									</img>
+								</td>
+								<td>
+									<img>
+										<xsl:attribute name="src">
+											<xsl:value-of select="IMAGESCORE"/>
+										</xsl:attribute>
+									</img>
+								</td>
+								<td><xsl:value-of select="MAXVAL"/></td>
+								<td><xsl:value-of select="MINVAL"/></td>
+							</tr>
+						</xsl:for-each>
+					</table>
+				</body>
+			</html>
+			
+		</xsl:template>
 	</xsl:stylesheet>
- <!--Start XML-->
+	<!--Start XML-->

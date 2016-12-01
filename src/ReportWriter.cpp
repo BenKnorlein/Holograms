@@ -10,6 +10,23 @@
 #include <opencv2/photo.hpp>
 #include "tinyxml2.h"
 
+template <typename T>
+cv::Mat ReportWriter::plotGraph(std::vector<T>& vals, int YRange[2])
+{
+
+	auto it = minmax_element(vals.begin(), vals.end());
+	float scale = 1. / ceil(*it.second - *it.first);
+	float bias = *it.first;
+	int rows = YRange[1] - YRange[0] + 1;
+	cv::Mat image = cv::Mat(rows, vals.size(), CV_8UC1,cv::Scalar(255));
+	for (int i = 0; i < (int)vals.size() - 1; i++)
+	{
+		cv::line(image, cv::Point(i, rows - 1 - (vals[i] - bias)*scale*YRange[1]), cv::Point(i + 1, rows - 1 - (vals[i + 1] - bias)*scale*YRange[1]), cv::Scalar(0, 0, 0), 1);
+	}
+
+	return image;
+}
+
 ReportWriter::ReportWriter(Settings *settings, std::string filename)
 {
 	m_outdir = settings->getOutputFolder() + "/" + filename;
@@ -145,10 +162,16 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 		outfile << "<AREA_PIXEL>" << area_pixel << "</AREA_PIXEL>" << std::endl;
 		outfile << "<AREA>" << area << "</AREA>" << std::endl;
 		
-		outfile << "<VAL>" << contours[c]->getValue() << "</VAL>" << std::endl;
+		outfile << "<MAXVAL>" << contours[c]->getMaxValue() << "</MAXVAL>" << std::endl;
+		outfile << "<MINVAL>" << *std::min_element(contours[c]->getValues()->begin(), contours[c]->getValues()->end()) << "</MINVAL>" << std::endl;
 		outfile << "<IMAGE>" << "contours_" + std::to_string(((long long)c)) + ".png" << "</IMAGE>" << std::endl;
 		outfile << "<IMAGEPHASE>" << "contoursPhase_" + std::to_string(((long long)c)) + ".png" << "</IMAGEPHASE>" << std::endl;
+		outfile << "<IMAGESCORE>" << "contoursScore_" + std::to_string(((long long)c)) + ".png" << "</IMAGESCORE>" << std::endl;
 		outfile << "</ROI>" << std::endl;
+
+		int bounds[2] = { 0, 50 };
+		cv::Mat plot = plotGraph(*contours[c]->getValues(), bounds);
+		cv::imwrite(m_outdir + "/" + "contoursScore_" + std::to_string(((long long)c)) + ".png", plot);
 	}
 	outfile << "</DATA>" << std::endl;
 	outfile << "</doc>" << std::endl;

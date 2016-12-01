@@ -13,6 +13,7 @@ Contour::Contour(std::vector<cv::Point> contourPoints)
 	initMask(contourPoints);
 	setPointsFromMask();
 	updateAll();
+	m_values.clear();
 }
 
 
@@ -21,14 +22,19 @@ Contour::~Contour()
 
 }
 
-void Contour::setValue(double value)
+void Contour::setMaxValue(double value)
 {
-	m_value = value;
+	m_max_value = value;
 }
 
-double Contour::getValue()
+double Contour::getMaxValue()
 {
-	return m_value;
+	return m_max_value;
+}
+
+std::vector<double>* Contour::getValues()
+{
+	return &m_values;
 }
 
 void Contour::setDepth(int depth)
@@ -81,7 +87,7 @@ void Contour::merge(Contour* contour, int stepsize)
 
 	m_depth = ((m_depth + getDepth()) * 0.5 / stepsize + 0.5);
 	m_depth *= stepsize;
-	m_value = (m_value * m_moments.m00 + contour->getValue() * getMoments().m00) / (m_moments.m00 + getMoments().m00);
+	m_max_value = (m_max_value * m_moments.m00 + contour->getMaxValue() * getMoments().m00) / (m_moments.m00 + getMoments().m00);
 }
 
 void Contour::updateAll()

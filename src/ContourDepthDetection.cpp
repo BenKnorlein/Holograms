@@ -20,7 +20,7 @@ void ContourDepthDetection::findBestDepth(Contour* contour, int start, int stop,
 {
 	int best_depth = 0;
 	float maxVal = -100000;
-
+	contour->getValues()->clear();
 	for (int d = start; d <= stop; d += step_width){
 		cv::Mat image;
 		if (!m_settings->getUseSharpness()){
@@ -38,6 +38,7 @@ void ContourDepthDetection::findBestDepth(Contour* contour, int start, int stop,
 		if (m_settings->getUseAbs()) roi = cv::abs(roi);
 
 		float val = cv::mean(roi, *contour->getMask())[0];
+		contour->getValues()->push_back(val);
 		if (val > maxVal)
 		{
 				maxVal = val;
@@ -45,6 +46,6 @@ void ContourDepthDetection::findBestDepth(Contour* contour, int start, int stop,
 		}
 	}
 	contour->setDepth(best_depth);
-	contour->setValue(maxVal);
+	contour->setMaxValue(maxVal);
 	std::cout << "Best Depth " << best_depth << std::endl;
 }
