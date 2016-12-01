@@ -28,6 +28,11 @@ public:
 		return templateFolder;
 	}
 
+	const std::string& getQCfolder() const
+	{
+		return QCfolder;
+	}
+
 	const bool& getOnline() const
 	{
 		return online;
@@ -147,6 +152,7 @@ protected:
 
 	std::string outputFolder;
 	std::string templateFolder;
+	std::string QCfolder;
 
 	//Octopus
 	bool online;

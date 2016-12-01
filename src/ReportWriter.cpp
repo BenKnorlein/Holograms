@@ -8,12 +8,14 @@
 #include <fstream>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/photo.hpp>
+#include "tinyxml2.h"
 
 ReportWriter::ReportWriter(Settings *settings, std::string filename)
 {
 	m_outdir = settings->getOutputFolder() + "/" + filename;
 	m_filename = filename;
 	m_templateFolder = settings->getTemplateFolder();
+	m_QCfolder = settings->getQCfolder();
 	m_pixel_size = settings->getPixelSize();
 	m_screen_to_source = settings->getScreenToSource();
 	m_width = settings->getWidth();
@@ -56,6 +58,53 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 	std::string buffer_st(buffer);
 	outfile.write(buffer, size);
 	delete[] buffer;
+
+	std::ofstream qcfile();
+	tinyxml2::XMLDocument doc;
+	std::string QCfilename = m_QCfolder + "/" + "holoyurt-qc-data.xml";
+
+	if (doc.LoadFile(QCfilename.c_str()) == tinyxml2::XML_SUCCESS){
+		outfile << "<QCDATA>" << std::endl;
+
+		tinyxml2::XMLElement* root;
+		root = doc.FirstChildElement("QCCONTAINER");
+		for (tinyxml2::XMLElement* e = root->FirstChildElement("HOLOGRAM"); e != NULL; e = e->NextSiblingElement("HOLOGRAM"))
+		{
+			if (std::string(e->FirstChildElement("FILENAME")->GetText()) == m_filename)
+			{
+				tinyxml2::XMLElement* roi = e->FirstChildElement("ROI");
+				outfile << "<ROI>" << std::endl;
+
+				outfile << "<X>" << roi->FirstChildElement("X")->GetText() << "</X>" << std::endl;
+				outfile << "<Y>" << roi->FirstChildElement("Y")->GetText() << "</Y>" << std::endl;
+
+				outfile << "<MAJORAXIS>" << roi->FirstChildElement("MAJORAXIS")->GetText() << "</MAJORAXIS>" << std::endl;
+				outfile << "<MINORAXIS>" << roi->FirstChildElement("MINORAXIS")->GetText() << "</MINORAXIS>" << std::endl;
+				if (roi->FirstChildElement("TYPE")->GetText() != NULL){
+					outfile << "<TYPE>" << roi->FirstChildElement("TYPE")->GetText() << "</TYPE>" << std::endl;
+				} else
+				{
+					outfile << "<TYPE>" << "</TYPE>" << std::endl;
+				}
+
+				outfile << "<DEPTH>" << roi->FirstChildElement("DEPTH")->GetText() << "</DEPTH>" << std::endl;
+
+				outfile << "<IMAGE>" << roi->FirstChildElement("IMAGE")->GetText() << "</IMAGE>" << std::endl;
+
+				outfile << "</ROI>" << std::endl;
+
+				std::ifstream  src(m_QCfolder + "/" + roi->FirstChildElement("IMAGE")->GetText(), std::ios::binary);
+				std::ofstream  dst(m_outdir + "/" + roi->FirstChildElement("IMAGE")->GetText(), std::ios::binary);
+
+				dst << src.rdbuf();
+				src.close();
+				dst.close();
+			}
+		}
+
+		outfile << "</QCDATA>" << std::endl;
+	}
+
 
 	outfile << "<DATA>" << std::endl;
 	outfile << "<FILENAME>" << m_filename << "</FILENAME>" << std::endl;

@@ -28,6 +28,42 @@ id ID #REQUIRED>
           <xsl:value-of select="DATA/MAXIMAGE"/>
         </xsl:attribute>
       </img>
+	    <xsl:if test="QCDATA">
+	  <h3>
+		QC Data
+	  </h3>
+	  <table border="1">
+		<tr bgcolor="#9acd32">
+		  <th>Type</th>
+		  <th>X</th>
+		  <th>Y</th>
+		  <th>Major axis</th>
+		  <th>Minor axis</th>
+		  <th>Depth</th>
+		  <th>Image</th>
+		</tr>
+		<xsl:for-each select="QCDATA/ROI">
+		<tr>
+		  <td><xsl:value-of select="TYPE"/></td>
+		  <td><xsl:value-of select="X"/></td>
+		  <td><xsl:value-of select="Y"/></td>
+		  <td><xsl:value-of select="MAJORAXIS"/></td>
+		  <td><xsl:value-of select="MINORAXIS"/></td>
+		  <td><xsl:value-of select="DEPTH"/></td>
+		  <td>
+			<img>
+				<xsl:attribute name="src">
+					<xsl:value-of select="IMAGE"/>
+				</xsl:attribute>
+			</img>
+		  </td>
+		</tr>
+		</xsl:for-each>
+	  </table>
+	  </xsl:if>
+	  <h3>
+		Detected
+	  </h3>
 	  <table border="1">
 		<tr bgcolor="#9acd32">
       <th>Contour</th>
@@ -36,7 +72,6 @@ id ID #REQUIRED>
 		  <th>Width</th>
 		  <th>Height</th>
 		  <th>Depth</th>
-		  <th>Area</th>
 		  <th>Image</th>
       <th>Phase</th>
 		</tr>
@@ -48,7 +83,6 @@ id ID #REQUIRED>
 		  <td><xsl:value-of select="WIDTH"/></td>
 		  <td><xsl:value-of select="HEIGHT"/></td>
 		  <td><xsl:value-of select="DEPTH"/></td>
-		  <td><xsl:value-of select="AREA"/></td>
 		  <td>
 			<img>
 				<xsl:attribute name="src">
