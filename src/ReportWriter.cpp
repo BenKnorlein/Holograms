@@ -164,7 +164,7 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 		
 		outfile << "<MAXVAL>" << contours[c]->getMaxValue() << "</MAXVAL>" << std::endl;
 		outfile << "<MINVAL>" << *std::min_element(contours[c]->getValues()->begin(), contours[c]->getValues()->end()) << "</MINVAL>" << std::endl;
-		outfile << "<IMAGE>" << "contours_" + std::to_string(((long long)c)) + ".png" << "</IMAGE>" << std::endl;
+		outfile << "<IMAGE>" << "contoursMasked_" + std::to_string(((long long)c)) + ".png" << "</IMAGE>" << std::endl;
 		outfile << "<IMAGEPHASE>" << "contoursPhase_" + std::to_string(((long long)c)) + ".png" << "</IMAGEPHASE>" << std::endl;
 		outfile << "<IMAGESCORE>" << "contoursScore_" + std::to_string(((long long)c)) + ".png" << "</IMAGESCORE>" << std::endl;
 		outfile << "</ROI>" << std::endl;
@@ -278,26 +278,26 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 					
 					cv::Point p = cv::Point(col, row) + bound_cont.tl();
 					if (!bound_orig.contains(p)) {
-						pixel[2] = 255;
+						pixel[2] = 255 * 0.3 + 0.7 * pixel[2];
 					} else {
 						cv::Point p2 = bound_orig.tl() - bound_cont.tl();	
 						unsigned char d2 = d_mask.at<unsigned char>(row - p2.y, col - p2.x);
-						if (d2 == 0) pixel[2] = 255;
+						if (d2 == 0) pixel[2] = 255 * 0.3 + 0.7 * pixel[2];
 					}
 					
 					m.at<cv::Vec3b>(row, col) = pixel;
 				}
 			}
 
-			cv::Point2d center = contours[c]->getPCACenter() - cv::Point2d(bound_cont.x, bound_cont.y);
-			cv::Point2d p1a = center + contours[c]->getPCAAxis()[0];
-			cv::Point2d p1b = center - contours[c]->getPCAAxis()[0];
-			cv::Point2d p2a = center + contours[c]->getPCAAxis()[1];
-			cv::Point2d p2b = center - contours[c]->getPCAAxis()[1];
-			cv::line(m, p1a, p1b, cv::Scalar(0, 255, 0), 1, CV_AA);
-			cv::line(m, p2a, p2b, cv::Scalar(255, 0, 0), 1, CV_AA);
+			//cv::Point2d center = contours[c]->getPCACenter() - cv::Point2d(bound_cont.x, bound_cont.y);
+			//cv::Point2d p1a = center + contours[c]->getPCAAxis()[0];
+			//cv::Point2d p1b = center - contours[c]->getPCAAxis()[0];
+			//cv::Point2d p2a = center + contours[c]->getPCAAxis()[1];
+			//cv::Point2d p2b = center - contours[c]->getPCAAxis()[1];
+			//cv::line(m, p1a, p1b, cv::Scalar(0, 255, 0), 1, CV_AA);
+			//cv::line(m, p2a, p2b, cv::Scalar(255, 0, 0), 1, CV_AA);
 			
-			cv::imwrite(m_outdir + "/" + "contoursTest_" + std::to_string(((long long)c)) + ".png", m);
+			cv::imwrite(m_outdir + "/" + "contoursMasked_" + std::to_string(((long long)c)) + ".png", m);
 		}
 		
 		
