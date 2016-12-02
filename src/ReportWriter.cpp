@@ -127,6 +127,7 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 	outfile << "<FILENAME>" << m_filename << "</FILENAME>" << std::endl;
 	outfile << "<CONTOURIMAGE>contours.png</CONTOURIMAGE>" << std::endl;
 	outfile << "<MAXIMAGE>maximum.png</MAXIMAGE>" << std::endl;
+	outfile << "<DEPTHIMAGE>depthImage.png</DEPTHIMAGE>" << std::endl;
 	outfile << "<TIME>" << time << "</TIME>" << std::endl;
 
 	for (size_t c = 0; c < contours.size(); c++)

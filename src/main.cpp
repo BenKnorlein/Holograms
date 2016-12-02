@@ -83,6 +83,8 @@ int main(int argc, char** argv)
 	writer->saveImage(*detector->getMaxImage(), "maximum.png", true);
 
 	detector->findContours(contours);
+	writer->saveImage(detector->getDepthImage(),"depthImage.png");
+
 	delete detector;
 	writer->saveContourImage(contours, settings);
 

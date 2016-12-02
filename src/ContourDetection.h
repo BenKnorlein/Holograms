@@ -20,6 +20,7 @@ public:
 
 	void generateMaxMap();
 	cv::Mat *getMaxImage();
+	cv::Mat getDepthImage();
 
 	void findContours(std::vector<Contour *> &contours);
 
@@ -28,6 +29,7 @@ private:
 	Settings * m_settings;
 
 	cv::Mat m_image_maximum;
+	cv::Mat m_image_depth;
 };
 
 #endif //CONTOURDETECTION_H

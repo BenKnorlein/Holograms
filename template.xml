@@ -18,19 +18,30 @@ id ID #REQUIRED>
 					<h2>
 					Processing time : <xsl:value-of select="DATA/TIME"/> minutes
 					</h2>
-					
+					<h5>
+						Contours
+					</h5>
 					<img height="1024" width="1024">
 						<xsl:attribute name="src">
 							<xsl:value-of select="DATA/CONTOURIMAGE"/>
 						</xsl:attribute>
 					</img>
-					
+					<h5>
+						Scores
+					</h5>
 					<img height="1024" width="1024">
 						<xsl:attribute name="src">
 							<xsl:value-of select="DATA/MAXIMAGE"/>
 						</xsl:attribute>
 					</img>
-					
+					<h5>
+						Depth
+					</h5>
+					<img height="1024" width="1024">
+						<xsl:attribute name="src">
+							<xsl:value-of select="DATA/DEPTHIMAGE"/>
+						</xsl:attribute>
+					</img>
 					<xsl:if test="QCDATA">
 						<h3>
 						QC Data

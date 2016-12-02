@@ -11,10 +11,12 @@
 ContourDetection::ContourDetection(ImageCache * cache, Settings * settings) : m_cache(cache), m_settings(settings)
 {
 	m_image_maximum = cv::Mat(cv::Size(m_settings->getWidth(), m_settings->getHeight()), CV_32FC1, cvScalar(0));
+	m_image_depth = cv::Mat(cv::Size(m_settings->getWidth(), m_settings->getHeight()), CV_32SC1, cvScalar(0));
 }
 
 ContourDetection::~ContourDetection()
 {
+
 }
 
 
@@ -43,13 +45,15 @@ void ContourDetection::generateMaxMap()
 			cv::filter2D(*m_cache->getGradientImage(d), image_tmp, CV_32F, kernel);
 		}
 		float* max_ptr = (float *)m_image_maximum.data;
+		int* depth_ptr = (int *)m_image_depth.data;
 		float* image_ptr = (float *)image_tmp.data;
 
-		for (int i = 0; i < m_settings->getWidth() * m_settings->getHeight(); i++, max_ptr++, image_ptr++)
+		for (int i = 0; i < m_settings->getWidth() * m_settings->getHeight(); i++, max_ptr++, image_ptr++, depth_ptr++)
 		{
 			if (*max_ptr < *image_ptr)
 			{
 				*max_ptr = *image_ptr;
+				*depth_ptr = d;
 			}
 		}
 
@@ -120,4 +124,45 @@ void ContourDetection::findContours(std::vector<Contour *> &contours )
 cv::Mat* ContourDetection::getMaxImage()
 {
 	return &m_image_maximum;
+}
+
+cv::Mat ContourDetection::getDepthImage()
+{
+	cv::Mat out  = cv::Mat(cv::Size(m_settings->getWidth(), m_settings->getHeight()), CV_8UC3, cvScalar(0,0,0));
+
+	//convert to 8U
+	cv::Mat bw;
+	m_image_maximum.convertTo(bw, CV_8U);
+	int offset = 255 - ( m_settings->getMaxDepth() - m_settings->getMinDepth() ) / m_settings->getStepSize();
+	for (int y = 0; y < bw.rows; y++)
+	{
+		for (int x = 0; x < bw.cols; x++)
+		{
+			if (bw.at<unsigned char>(y, x) > 0)
+			{
+				int val = (m_image_depth.at<int>(y, x) - m_settings->getMinDepth()) / m_settings->getStepSize();
+				out.at<cv::Vec3b>(y, x)[0] = offset + val;
+				out.at<cv::Vec3b>(y, x)[1] = 0;
+				out.at<cv::Vec3b>(y, x)[2] = offset + (255 - val);
+			}
+		}
+	}
+
+	int y = 350;//start at y=50, then increment
+	for (int d = m_settings->getMinDepth(); d <= m_settings->getMaxDepth(); d += m_settings->getStepSize())
+	{
+		int val = (d - m_settings->getMinDepth()) / m_settings->getStepSize();
+		y--;
+		cv::Scalar color = cv::Scalar(offset + val, 0, offset + (255 - val));
+		rectangle(out, cv::Point(1900, y), cv::Point(1920, y + 1), color, 1);
+
+		if ((d - m_settings->getMinDepth()) % (m_settings->getStepSize() * 20) == 0)
+		{
+			cv::line(out, cv::Point(1920, y), cv::Point(1925, y), cv::Scalar(255, 255, 255));
+				putText(out, std::to_string(d), cv::Point(1927, y+5),
+					cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 1, CV_AA);
+		}
+	}
+
+	return out;
 }
