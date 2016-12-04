@@ -71,6 +71,7 @@ SET(HEADERS
 	src/Contour.h
 	src/ContourMerge.h
 	src/PhaseExperiments.h
+	src/SharpnessDetection.h
 )
 
 SET(SOURCES
@@ -85,7 +86,11 @@ SET(SOURCES
 	src/ContourDetection.cpp
 	src/Contour.cpp
 	src/ContourMerge.cpp
+<<<<<<< HEAD
 	src/PhaseExperiments.cpp
+=======
+	src/SharpnessDetection.cpp
+>>>>>>> master
 )
 
 SOURCE_GROUP(_CORE FILES ${HEADERS} ${SOURCES} )

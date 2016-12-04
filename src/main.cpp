@@ -68,12 +68,11 @@ int main(int argc, char** argv)
 	ImageCache * cache;
 	if (settings->getOnline())
 	{
-		cache = new ImageCache(new OctopusClient(settings->getIp(), settings->getPort()), 500);
+		cache = new ImageCache(new OctopusClient(settings->getIp(), settings->getPort()),settings, 500);
 	} 
 	else
 	{
-		cache = new ImageCache(new OfflineReader(), 500);
-
+		cache = new ImageCache(new OfflineReader(), settings, settings->getMaxImageCacheStorage());
 	}
 	cache->getImageSource()->setSourceHologram(settings->getDatafolder(), filename);
 
@@ -85,7 +84,10 @@ int main(int argc, char** argv)
 	writer->saveImage(*detector->getMaxImage(), "maximum.png", true);
 
 	detector->findContours(contours);
+	writer->saveImage(detector->getDepthImage(),"depthImage.png");
+
 	delete detector;
+	writer->saveContourImage(contours, settings);
 
 ////////Find best depth for contour
 	ContourDepthDetection * depthdetector = new ContourDepthDetection(cache, settings);

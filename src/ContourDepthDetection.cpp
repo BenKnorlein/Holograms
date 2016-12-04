@@ -7,8 +7,7 @@
 
 ContourDepthDetection::ContourDepthDetection(ImageCache * cache, Settings * settings) : m_cache(cache), m_settings(settings)
 {
-
-
+	
 }
 
 ContourDepthDetection::~ContourDepthDetection()
@@ -21,17 +20,25 @@ void ContourDepthDetection::findBestDepth(Contour* contour, int start, int stop,
 {
 	int best_depth = 0;
 	float maxVal = -100000;
-
+	contour->getValues()->clear();
 	for (int d = start; d <= stop; d += step_width){
-		cv::Mat * image = m_cache->getPhaseImage(d);
+		cv::Mat image;
+		if (!m_settings->getUseSharpness()){
+			image = *m_cache->getPhaseImage(d);
+		} 
+		else
+		{
+			image = *m_cache->getGradientImage(d);
+		}
 		cv::Mat tmp;
 
 		cv::Mat roi;
-		((*image)(contour->getBoundingBox())).copyTo(roi);
+		((image)(contour->getBoundingBox())).copyTo(roi);
 
 		if (m_settings->getUseAbs()) roi = cv::abs(roi);
 
 		float val = cv::mean(roi, *contour->getMask())[0];
+		contour->getValues()->push_back(val);
 		if (val > maxVal)
 		{
 				maxVal = val;
@@ -39,6 +46,6 @@ void ContourDepthDetection::findBestDepth(Contour* contour, int start, int stop,
 		}
 	}
 	contour->setDepth(best_depth);
-	contour->setValue(maxVal);
+	contour->setMaxValue(maxVal);
 	std::cout << "Best Depth " << best_depth << std::endl;
 }

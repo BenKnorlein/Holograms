@@ -15,8 +15,11 @@ public:
 	Contour(std::vector<cv::Point> contourPoints);
 	~Contour();
 
-	void setValue(double value);
-	double getValue();
+	void setMaxValue(double value);
+	double getMaxValue();
+
+	std::vector<double>* getValues();
+
 	void setDepth(int depth);
 	int getDepth();
 	cv::Rect getBoundingBox();
@@ -34,7 +37,8 @@ private:
 	std::vector <cv::Point> m_pointsMask;
 	cv::Mat m_mask;
 	int m_depth;
-	int m_value;
+	double m_max_value;
+	std::vector<double> m_values;
 	cv::Rect m_boundingbox;
 	cv::RotatedRect m_alignedBoundingbox; // major axis
 	cv::Point2d m_centerOfGravity;

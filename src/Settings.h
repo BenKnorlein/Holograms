@@ -28,6 +28,11 @@ public:
 		return templateFolder;
 	}
 
+	const std::string& getQCfolder() const
+	{
+		return QCfolder;
+	}
+
 	const bool& getOnline() const
 	{
 		return online;
@@ -123,6 +128,21 @@ public:
 		return pixel_size;
 	}
 
+	const int& getMaxImageCacheStorage() const
+	{
+		return maxImageCacheStorage;
+	}
+
+	const bool& getUseSharpness() const
+	{
+		return useSharpness;
+	}
+
+	const int& getMethodSharpness() const
+	{
+		return methodSharpness;
+	}
+
 protected:
 
 protected:
@@ -132,6 +152,7 @@ protected:
 
 	std::string outputFolder;
 	std::string templateFolder;
+	std::string QCfolder;
 
 	//Octopus
 	bool online;
@@ -167,6 +188,13 @@ protected:
 	//pixel to real units conversion settings
 	int screen_to_source;
 	int pixel_size;
+
+	//ImageCache 
+	int maxImageCacheStorage;
+
+	//SharpnessProcessing
+	bool useSharpness;
+	int methodSharpness;
 };
 
 #endif //SETTINGS_H

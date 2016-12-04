@@ -8,12 +8,31 @@
 #include <fstream>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/photo.hpp>
+#include "tinyxml2.h"
+
+template <typename T>
+cv::Mat ReportWriter::plotGraph(std::vector<T>& vals, int YRange[2])
+{
+
+	auto it = minmax_element(vals.begin(), vals.end());
+	float scale = 1. / ceil(*it.second - *it.first);
+	float bias = *it.first;
+	int rows = YRange[1] - YRange[0] + 1;
+	cv::Mat image = cv::Mat(rows, vals.size(), CV_8UC1,cv::Scalar(255));
+	for (int i = 0; i < (int)vals.size() - 1; i++)
+	{
+		cv::line(image, cv::Point(i, rows - 1 - (vals[i] - bias)*scale*YRange[1]), cv::Point(i + 1, rows - 1 - (vals[i + 1] - bias)*scale*YRange[1]), cv::Scalar(0, 0, 0), 1);
+	}
+
+	return image;
+}
 
 ReportWriter::ReportWriter(Settings *settings, std::string filename)
 {
 	m_outdir = settings->getOutputFolder() + "/" + filename;
 	m_filename = filename;
 	m_templateFolder = settings->getTemplateFolder();
+	m_QCfolder = settings->getQCfolder();
 	m_pixel_size = settings->getPixelSize();
 	m_screen_to_source = settings->getScreenToSource();
 	m_width = settings->getWidth();
@@ -57,10 +76,58 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 	outfile.write(buffer, size);
 	delete[] buffer;
 
+	std::ofstream qcfile();
+	tinyxml2::XMLDocument doc;
+	std::string QCfilename = m_QCfolder + "/" + "holoyurt-qc-data.xml";
+
+	if (doc.LoadFile(QCfilename.c_str()) == tinyxml2::XML_SUCCESS){
+		outfile << "<QCDATA>" << std::endl;
+
+		tinyxml2::XMLElement* root;
+		root = doc.FirstChildElement("QCCONTAINER");
+		for (tinyxml2::XMLElement* e = root->FirstChildElement("HOLOGRAM"); e != NULL; e = e->NextSiblingElement("HOLOGRAM"))
+		{
+			if (std::string(e->FirstChildElement("FILENAME")->GetText()) == m_filename)
+			{
+				tinyxml2::XMLElement* roi = e->FirstChildElement("ROI");
+				outfile << "<ROI>" << std::endl;
+
+				outfile << "<X>" << roi->FirstChildElement("X")->GetText() << "</X>" << std::endl;
+				outfile << "<Y>" << roi->FirstChildElement("Y")->GetText() << "</Y>" << std::endl;
+
+				outfile << "<MAJORAXIS>" << roi->FirstChildElement("MAJORAXIS")->GetText() << "</MAJORAXIS>" << std::endl;
+				outfile << "<MINORAXIS>" << roi->FirstChildElement("MINORAXIS")->GetText() << "</MINORAXIS>" << std::endl;
+				if (roi->FirstChildElement("TYPE")->GetText() != NULL){
+					outfile << "<TYPE>" << roi->FirstChildElement("TYPE")->GetText() << "</TYPE>" << std::endl;
+				} else
+				{
+					outfile << "<TYPE>" << "</TYPE>" << std::endl;
+				}
+
+				outfile << "<DEPTH>" << roi->FirstChildElement("DEPTH")->GetText() << "</DEPTH>" << std::endl;
+
+				outfile << "<IMAGE>" << roi->FirstChildElement("IMAGE")->GetText() << "</IMAGE>" << std::endl;
+
+				outfile << "</ROI>" << std::endl;
+
+				std::ifstream  src(m_QCfolder + "/" + roi->FirstChildElement("IMAGE")->GetText(), std::ios::binary);
+				std::ofstream  dst(m_outdir + "/" + roi->FirstChildElement("IMAGE")->GetText(), std::ios::binary);
+
+				dst << src.rdbuf();
+				src.close();
+				dst.close();
+			}
+		}
+
+		outfile << "</QCDATA>" << std::endl;
+	}
+
+
 	outfile << "<DATA>" << std::endl;
 	outfile << "<FILENAME>" << m_filename << "</FILENAME>" << std::endl;
 	outfile << "<CONTOURIMAGE>contours.png</CONTOURIMAGE>" << std::endl;
 	outfile << "<MAXIMAGE>maximum.png</MAXIMAGE>" << std::endl;
+	outfile << "<DEPTHIMAGE>depthImage.png</DEPTHIMAGE>" << std::endl;
 	outfile << "<TIME>" << time << "</TIME>" << std::endl;
 
 	for (size_t c = 0; c < contours.size(); c++)
@@ -96,10 +163,16 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 		outfile << "<AREA_PIXEL>" << area_pixel << "</AREA_PIXEL>" << std::endl;
 		outfile << "<AREA>" << area << "</AREA>" << std::endl;
 		
-		outfile << "<VAL>" << contours[c]->getValue() << "</VAL>" << std::endl;
-		outfile << "<IMAGE>" << "contours_" + std::to_string(((long long)c)) + ".png" << "</IMAGE>" << std::endl;
+		outfile << "<MAXVAL>" << contours[c]->getMaxValue() << "</MAXVAL>" << std::endl;
+		outfile << "<MINVAL>" << *std::min_element(contours[c]->getValues()->begin(), contours[c]->getValues()->end()) << "</MINVAL>" << std::endl;
+		outfile << "<IMAGE>" << "contoursMasked_" + std::to_string(((long long)c)) + ".png" << "</IMAGE>" << std::endl;
 		outfile << "<IMAGEPHASE>" << "contoursPhase_" + std::to_string(((long long)c)) + ".png" << "</IMAGEPHASE>" << std::endl;
+		outfile << "<IMAGESCORE>" << "contoursScore_" + std::to_string(((long long)c)) + ".png" << "</IMAGESCORE>" << std::endl;
 		outfile << "</ROI>" << std::endl;
+
+		int bounds[2] = { 0, 50 };
+		cv::Mat plot = plotGraph(*contours[c]->getValues(), bounds);
+		cv::imwrite(m_outdir + "/" + "contoursScore_" + std::to_string(((long long)c)) + ".png", plot);
 	}
 	outfile << "</DATA>" << std::endl;
 	outfile << "</doc>" << std::endl;
@@ -216,26 +289,26 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 					
 					cv::Point p = cv::Point(col, row) + bound_cont.tl();
 					if (!bound_orig.contains(p)) {
-						pixel[2] = 255;
+						pixel[2] = 255 * 0.3 + 0.7 * pixel[2];
 					} else {
 						cv::Point p2 = bound_orig.tl() - bound_cont.tl();	
 						unsigned char d2 = d_mask.at<unsigned char>(row - p2.y, col - p2.x);
-						if (d2 == 0) pixel[2] = 255;
+						if (d2 == 0) pixel[2] = 255 * 0.3 + 0.7 * pixel[2];
 					}
 					
 					m.at<cv::Vec3b>(row, col) = pixel;
 				}
 			}
 
-			cv::Point2d center = contours[c]->getPCACenter() - cv::Point2d(bound_cont.x, bound_cont.y);
-			cv::Point2d p1a = center + contours[c]->getPCAAxis()[0];
-			cv::Point2d p1b = center - contours[c]->getPCAAxis()[0];
-			cv::Point2d p2a = center + contours[c]->getPCAAxis()[1];
-			cv::Point2d p2b = center - contours[c]->getPCAAxis()[1];
-			cv::line(m, p1a, p1b, cv::Scalar(0, 255, 0), 1, CV_AA);
-			cv::line(m, p2a, p2b, cv::Scalar(255, 0, 0), 1, CV_AA);
+			//cv::Point2d center = contours[c]->getPCACenter() - cv::Point2d(bound_cont.x, bound_cont.y);
+			//cv::Point2d p1a = center + contours[c]->getPCAAxis()[0];
+			//cv::Point2d p1b = center - contours[c]->getPCAAxis()[0];
+			//cv::Point2d p2a = center + contours[c]->getPCAAxis()[1];
+			//cv::Point2d p2b = center - contours[c]->getPCAAxis()[1];
+			//cv::line(m, p1a, p1b, cv::Scalar(0, 255, 0), 1, CV_AA);
+			//cv::line(m, p2a, p2b, cv::Scalar(255, 0, 0), 1, CV_AA);
 			
-			cv::imwrite(m_outdir + "/" + "contoursTest_" + std::to_string(((long long)c)) + ".png", m);
+			cv::imwrite(m_outdir + "/" + "contoursMasked_" + std::to_string(((long long)c)) + ".png", m);
 		}
 		
 		
