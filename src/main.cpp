@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 		std::cerr << "You need to provide a filename and a settings.xml" << std::endl;
 		return 0;
 	}
-#include <iostream>
+	
 	std::string filename = std::string(argv[1]);
 	Settings * settings = new Settings(argv[2]);
 

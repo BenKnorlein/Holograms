@@ -70,7 +70,7 @@ bool OctopusClient::setSourceHologram(std::string folder, std::string filename, 
 	std::string reply = std::string(m_dummyBuffer, 26);
 	if (reply != "RECONSTRUCT_HOLOGRAMS 0\n0\n" && reply != "RECONSTRUCT_HOLOGRAMS 1\n0\n" && reply != "RECONSTRUCT_HOLOGRAMS 2\n0\n") {
 		std::cout << "REPLY:" << reply << ", expect:" << "RECONSTRUCT_HOLOGRAMS 0\n0\n or RECONSTRUCT_HOLOGRAMS 1\n0\n or RECONSTRUCT_HOLOGRAMS 2\n0\n" << std::endl;
-		assert(reply == "RECONSTRUCT_HOLOGRAMS 0\n0\n" || reply == "RECONSTRUCT_HOLOGRAMS 1\n0\n" || reply == "RECONSTRUCT_HOLOGRAMS 2\n0\n");
+		//assert(reply == "RECONSTRUCT_HOLOGRAMS 0\n0\n" || reply == "RECONSTRUCT_HOLOGRAMS 1\n0\n" || reply == "RECONSTRUCT_HOLOGRAMS 2\n0\n");
 	}
 
 	if (reply != "RECONSTRUCT_HOLOGRAMS 1\n0\n") return false;
@@ -106,7 +106,8 @@ void OctopusClient::receiveImageData(int depth, float* data)
 
 	if (reply != expectedReply && replyCutoff != expectedReplyCutoff) {
 		std::cout << "REPLY:" << reply << ":vs XPCT:" << expectedReply << std::endl;
-		assert(reply == expectedReply);
+	// compare and send request again if different
+	//assert(reply == expectedReply);
 	}
 #ifdef DEBUG
 	std::cout << "Receive " << reply << std::endl;
