@@ -57,6 +57,8 @@ bool OctopusClient::setSourceHologram(std::string folder, std::string filename, 
 	m_background = background;
 	m_filename = filename;
 	m_folder = folder;
+	if (m_folder.back() != '/')m_folder.append("/");
+
 	std::string backgroundString = "";
 	if (m_background != "")
 	{
