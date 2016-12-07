@@ -106,8 +106,15 @@ ADD_EXECUTABLE(writeImages ${GUI_TYPE}
 		${HEADERS}
 )
 
+ADD_EXECUTABLE(testScore ${GUI_TYPE}
+		src/testScore.cpp
+		${SOURCES} 
+		${HEADERS}
+)
+
 IF (APPLE)
   add_dependencies(${PROJECT_NAME} osx_bundle_dirs )
 ENDIF (APPLE)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(writeImages ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(testScore ${OpenCV_LIBS})
