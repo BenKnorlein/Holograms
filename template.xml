@@ -19,7 +19,23 @@ id ID #REQUIRED>
 					Processing time : <xsl:value-of select="DATA/TIME"/> minutes
 					</h2>
 					<h5>
-						Contours
+						Contours Splatted
+					</h5>
+					<img height="1024" width="1024">
+						<xsl:attribute name="src">
+							<xsl:value-of select="DATA/CONTOURSPLATIMAGE"/>
+						</xsl:attribute>
+					</img>
+					<h5>
+						Depth
+					</h5>
+					<img height="1024" width="1024">
+						<xsl:attribute name="src">
+							<xsl:value-of select="DATA/DEPTHIMAGE"/>
+						</xsl:attribute>
+					</img>
+					<h5>
+						Contours IDs
 					</h5>
 					<img height="1024" width="1024">
 						<xsl:attribute name="src">
@@ -32,14 +48,6 @@ id ID #REQUIRED>
 					<img height="1024" width="1024">
 						<xsl:attribute name="src">
 							<xsl:value-of select="DATA/MAXIMAGE"/>
-						</xsl:attribute>
-					</img>
-					<h5>
-						Depth
-					</h5>
-					<img height="1024" width="1024">
-						<xsl:attribute name="src">
-							<xsl:value-of select="DATA/DEPTHIMAGE"/>
 						</xsl:attribute>
 					</img>
 					<xsl:if test="QCDATA">

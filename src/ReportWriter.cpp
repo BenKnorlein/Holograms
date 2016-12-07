@@ -125,6 +125,7 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 
 	outfile << "<DATA>" << std::endl;
 	outfile << "<FILENAME>" << m_filename << "</FILENAME>" << std::endl;
+	outfile << "<CONTOURSPLATIMAGE>contoursSplat.png</CONTOURSPLATIMAGE>" << std::endl;
 	outfile << "<CONTOURIMAGE>contours.png</CONTOURIMAGE>" << std::endl;
 	outfile << "<MAXIMAGE>maximum.png</MAXIMAGE>" << std::endl;
 	outfile << "<DEPTHIMAGE>depthImage.png</DEPTHIMAGE>" << std::endl;
@@ -178,6 +179,27 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 	outfile << "</doc>" << std::endl;
 
 	outfile.close();
+}
+
+void ReportWriter::writeSplatImage(std::vector<Contour*> contours, ImageCache* cache)
+{
+	cv::Mat out(cv::Size(m_width, m_height), CV_8UC3, cv::Scalar(0, 0, 0));
+	for (size_t c = 0; c < contours.size(); c++)
+	{
+		cv::Mat *image = cache->getAmplitudeImage(contours[c]->getDepth());
+		cv::Mat drawing;
+		cv::Mat image_display;
+		cv::normalize(*image, image_display, 0, 255, CV_MINMAX);
+		image_display.convertTo(drawing, CV_8U);
+
+		for (std::vector<cv::Point>::iterator pt = contours[c]->getPoints()->begin(); pt != contours[c]->getPoints()->end(); ++pt)
+		{
+			unsigned char val = drawing.at<unsigned char>(pt->y, pt->x);
+			out.at<cv::Vec3b>(pt->y, pt->x) = cv::Vec3b(val,val,val);
+		}
+
+	}
+	cv::imwrite(m_outdir + "/" + "contoursSplat.png", out);
 }
 
 std::string type2str(int type) {
