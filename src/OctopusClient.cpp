@@ -16,9 +16,7 @@ OctopusClient::OctopusClient(const std::string &serverIP, const std::string &ser
 	// put the software into the special 'receive information through
 	// back door' mode, and should more or less disable the GUI.
 	
-	Sleep(1000);
 	m_sock->sendMessage("SET_API_VERSION 2\n");
-	Sleep(1000);	
 
 	//clear pipe;
 	char buffer[1024];
@@ -65,11 +63,9 @@ bool OctopusClient::setSourceHologram(std::string folder, std::string filename, 
 		backgroundString = "*" + m_folder + m_background;
 	}
 
-	Sleep(3000);
 	m_sock->sendMessage("RECONSTRUCT_HOLOGRAMS " + m_folder + m_filename + backgroundString + "\n0\n");
 
-	//Sleep(10);
-	Sleep(10000);
+	Sleep(10);
 	m_sock->receiveMessage(&m_dummyBuffer[0], 26);
 
 	std::string reply = std::string(m_dummyBuffer, 26);
@@ -82,8 +78,7 @@ bool OctopusClient::setSourceHologram(std::string folder, std::string filename, 
 #ifdef DEBUG
 	std::cout << reply << std::endl;
 #endif
-	//Sleep(500);
-	Sleep(10000);
+	Sleep(500);
 	return true;
 }
 
@@ -95,7 +90,6 @@ void OctopusClient::receiveImageData(int depth, float* data)
 #ifdef DEBUG
 	std::cout << "Send" << message << std::endl;
 #endif
-	Sleep(2000);
 	m_sock->sendMessage(message);
 
 	//receive data
@@ -103,8 +97,7 @@ void OctopusClient::receiveImageData(int depth, float* data)
 
 	std::string expectedReplyCutoff = "TREAM_RECONSTRUCTION 2048 2048 " + m_filename + " " + m_background + " " + std::to_string(depth) + " " + std::to_string(m_mode) + "\n" + std::to_string(datasize) + "\n";
 
-	//Sleep(500);
-	Sleep(2000);
+	Sleep(500);
 	m_sock->receiveMessage(m_dummyBuffer, expectedReply.size());
 #ifdef DEBUG
 	std::cout << "dummyBuffer:" << m_dummyBuffer << std::endl;
@@ -121,9 +114,7 @@ void OctopusClient::receiveImageData(int depth, float* data)
 	std::cout << "Receive " << reply << std::endl;
 #endif
 	char * dataPtr = (char *)&data[0];
-	Sleep(2000);
 	datasize = m_sock->receiveMessage(dataPtr, datasize);
-	Sleep(2000);
 	//int * ptr_org = (int*)&data[0];
 	//int * ptr_dest = (int*)&data[0];
 
@@ -141,19 +132,15 @@ bool OctopusClient::setOutputMode(int mode)
 	if (m_mode != mode){
 		m_mode = mode;
 		std::string message = "OUTPUT_MODE " + std::to_string(m_mode) + "\n0\n";
-		Sleep(2000);
 		m_sock->sendMessage(message);
-		Sleep(2000);
 		m_sock->receiveMessage(&m_dummyBuffer[0], message.size());
-		Sleep(2000);
 		std::string reply = std::string(m_dummyBuffer, message.size());
 #ifdef DEBUG
 		std::cout << reply << std::endl;
 #endif
 		assert(reply == message);
 		if (reply != message) return false;
-		//Sleep(500);
-		Sleep(1000);
+		Sleep(500);
 	}
 
 	return true;
