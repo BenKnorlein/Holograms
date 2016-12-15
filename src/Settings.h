@@ -148,6 +148,16 @@ public:
 		return scope;
 	}
 
+	const bool& getSaveIntensity() const
+	{
+		return saveIntensity;
+	}
+
+	const bool& getSavePngImages() const
+	{
+		return savePngImages;
+	}
+
 protected:
 
 protected:
@@ -203,6 +213,10 @@ protected:
 
 	//Microscope
 	std::string scope;
+
+	//WriteImages
+	bool saveIntensity;
+	bool savePngImages;
 };
 
 #endif //SETTINGS_H

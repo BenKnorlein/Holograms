@@ -90,6 +90,17 @@ SET(SOURCES
 	src/SharpnessDetection.cpp
 )
 
+if(MSVC OR MSVC_IDE)
+	SET(SOURCES
+		${SOURCES}
+		src/ThreadedImageSaver.cpp
+	)
+	SET(HEADERS
+		${HEADERS}
+		src/ThreadedImageSaver.h
+	)
+ENDIF(MSVC OR MSVC_IDE)
+
 SOURCE_GROUP(_CORE FILES ${HEADERS} ${SOURCES} )
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
