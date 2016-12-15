@@ -70,6 +70,7 @@ SET(HEADERS
 	src/ContourDetection.h
 	src/Contour.h
 	src/ContourMerge.h
+	src/PhaseExperiments.h
 	src/SharpnessDetection.h
 )
 
@@ -85,6 +86,7 @@ SET(SOURCES
 	src/ContourDetection.cpp
 	src/Contour.cpp
 	src/ContourMerge.cpp
+	src/PhaseExperiments.cpp
 	src/SharpnessDetection.cpp
 )
 

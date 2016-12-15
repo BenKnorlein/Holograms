@@ -10,6 +10,7 @@
 #include "ReportWriter.h"
 #include "Settings.h"
 #include "ContourDetection.h"
+#include "PhaseExperiments.h"
 
 #include <iostream>
 
@@ -19,7 +20,7 @@
 #ifndef WITH_CONSOLE
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
-	#include <windows.h>
+#include <windows.h>
 #else
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -48,7 +49,7 @@ int main(int argc, char** argv)
 		std::cerr << "You need to provide a filename and a settings.xml" << std::endl;
 		return 0;
 	}
-
+	
 	std::string filename = std::string(argv[1]);
 	Settings * settings = new Settings(argv[2]);
 
@@ -121,6 +122,12 @@ int main(int argc, char** argv)
 		delete depthdetector;
 	}
 
+////////Phase Experimetal Testing	
+	//PhaseExperiments *pe = new PhaseExperiments(settings, cache, outFile);
+	//pe->randomContourPixels(contours[1], 5, 10000, 12000, 100);
+	//pe->randomContourPixels(contours[3], 10, 10000, 12000, 100);
+	//delete pe;
+	
 ////////Create Report
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	writer->writeXMLReport(contours, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());

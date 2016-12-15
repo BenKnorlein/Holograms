@@ -15,7 +15,7 @@ OctopusClient::OctopusClient(const std::string &serverIP, const std::string &ser
 	// Send the API version to the Octopus software.  This is supposed to 
 	// put the software into the special 'receive information through
 	// back door' mode, and should more or less disable the GUI.
-
+	
 	m_sock->sendMessage("SET_API_VERSION 2\n");
 
 	//clear pipe;
@@ -64,6 +64,7 @@ bool OctopusClient::setSourceHologram(std::string folder, std::string filename, 
 	{
 		backgroundString = "*" + m_folder + m_background;
 	}
+
 	m_sock->sendMessage("RECONSTRUCT_HOLOGRAMS " + m_folder + m_filename + backgroundString + "\n0\n");
 
 	Sleep(10);
@@ -98,7 +99,7 @@ void OctopusClient::receiveImageData(int depth, float* data)
 
 	std::string expectedReplyCutoff = "TREAM_RECONSTRUCTION 2048 2048 " + m_filename + " " + m_background + " " + std::to_string(depth) + " " + std::to_string(m_mode) + "\n" + std::to_string(datasize) + "\n";
 
-	Sleep(500);
+	//Sleep(500);
 	m_sock->receiveMessage(m_dummyBuffer, expectedReply.size());
 #ifdef DEBUG
 	std::cout << "dummyBuffer:" << m_dummyBuffer << std::endl;
@@ -108,14 +109,14 @@ void OctopusClient::receiveImageData(int depth, float* data)
 
 	if (reply != expectedReply && replyCutoff != expectedReplyCutoff) {
 		std::cout << "REPLY:" << reply << ":vs XPCT:" << expectedReply << std::endl;
-		assert(reply == expectedReply);
+	// compare and send request again if different
+	assert(reply == expectedReply);
 	}
 #ifdef DEBUG
 	std::cout << "Receive " << reply << std::endl;
 #endif
 	char * dataPtr = (char *)&data[0];
 	datasize = m_sock->receiveMessage(dataPtr, datasize);
-
 	//int * ptr_org = (int*)&data[0];
 	//int * ptr_dest = (int*)&data[0];
 
@@ -134,9 +135,7 @@ bool OctopusClient::setOutputMode(int mode)
 		m_mode = mode;
 		std::string message = "OUTPUT_MODE " + std::to_string(m_mode) + "\n0\n";
 		m_sock->sendMessage(message);
-
 		m_sock->receiveMessage(&m_dummyBuffer[0], message.size());
-
 		std::string reply = std::string(m_dummyBuffer, message.size());
 #ifdef DEBUG
 		std::cout << reply << std::endl;
