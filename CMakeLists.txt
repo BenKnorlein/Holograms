@@ -86,11 +86,8 @@ SET(SOURCES
 	src/ContourDetection.cpp
 	src/Contour.cpp
 	src/ContourMerge.cpp
-<<<<<<< HEAD
 	src/PhaseExperiments.cpp
-=======
 	src/SharpnessDetection.cpp
->>>>>>> master
 )
 
 SOURCE_GROUP(_CORE FILES ${HEADERS} ${SOURCES} )

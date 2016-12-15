@@ -1,14 +1,18 @@
 <Settings>
-	<datafolder>/users/cavedemo/data/holoyurt-data/Holograms</datafolder>
-	<outputFolder>online_holograms</outputFolder>
+	<datafolder>/users/cavedemo/data/holoyurt-data/offline</datafolder>
+	<outputFolder>offline_holograms</outputFolder>
 	<templateFolder></templateFolder>
-	
-	<online>1</online>
+	<QCfolder>/users/cavedemo/data/holoyurt-data/cast11/</QCfolder>
+		
+	<online>0</online>
 	<ip>172.20.160.24</ip>
 	<port>1975</port>
 	
 	<show>1</show>
-
+	
+	<maxImageCacheStorage>300</maxImageCacheStorage>
+	<useSharpness>0</useSharpness>
+	<methodSharpness>2</methodSharpness>
 	<useAbs>1</useAbs>
 	<step_size>100</step_size>
 	<min_depth>1000</min_depth>
@@ -20,13 +24,12 @@
 
 	<windowsize>5</windowsize>
 
-	<max_threshold>0.35</max_threshold>
+	<max_threshold>0.55</max_threshold>
 	<contour_minArea>10.0</contour_minArea>
 
 	<doMergebounds>1</doMergebounds>
 	<merge_threshold_depth>400</merge_threshold_depth>
 	<merge_threshold_dist>50</merge_threshold_dist>
-
-	<screen_to_source>500</screen_to_source>
-	<pixel_size>5</pixel_size>
+	
+	<microscope>Submersible_750</microscope>
 </Settings>

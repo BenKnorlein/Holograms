@@ -123,9 +123,10 @@ int main(int argc, char** argv)
 	}
 
 ////////Phase Experimetal Testing	
-	PhaseExperiments *pe = new PhaseExperiments(settings, cache, outFile);
-	pe->randomContourPixels(contours[1], 5, 10000, 12000, 100);
-	pe->randomContourPixels(contours[3], 10, 10000, 12000, 100);
+	//PhaseExperiments *pe = new PhaseExperiments(settings, cache, outFile);
+	//pe->randomContourPixels(contours[1], 5, 10000, 12000, 100);
+	//pe->randomContourPixels(contours[3], 10, 10000, 12000, 100);
+	//delete pe;
 	
 ////////Create Report
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();

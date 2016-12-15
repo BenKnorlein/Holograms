@@ -37,6 +37,7 @@ ReportWriter::ReportWriter(Settings *settings, std::string filename)
 	m_screen_to_source = settings->getScreenToSource();
 	m_width = settings->getWidth();
 	m_height = settings->getHeight();
+	m_settings = settings;
 }
 
 ReportWriter::~ReportWriter()
@@ -175,8 +176,38 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 		cv::imwrite(m_outdir + "/" + "contoursScore_" + std::to_string(((long long)c)) + ".png", plot);
 	}
 	outfile << "</DATA>" << std::endl;
-	outfile << "</doc>" << std::endl;
+	
+	outfile << "<SETTINGS>" << std::endl;
+	outfile << "  <DF>" << m_settings->getDatafolder() << "</DF>\n";
+        outfile << "  <OF>" << m_settings->getOutputFolder() << "</OF>\n";
+        outfile << "  <TF>" << m_settings->getTemplateFolder() << "</TF>\n";
+        outfile << "  <QCF>" << m_settings->getQCfolder() << "</QCF>\n";
+        outfile << "  <ONLINE>" << m_settings->getOnline() << "</ONLINE>\n";
+        outfile << "  <IP>" << m_settings->getIp() << "</IP>\n";
+        outfile << "  <PORT>" << m_settings->getPort() << "</PORT>\n";
+        outfile << "  <SHOW>" << m_settings->getShow() << "</SHOW>\n";
+        outfile << "  <MICS>" << m_settings->getMaxImageCacheStorage() << "</MICS>\n";
+        outfile << "  <SHARP>" << m_settings->getUseSharpness() << "</SHARP>\n";
+        outfile << "  <SHARP_METHOD>" << m_settings->getMethodSharpness() << "</SHARP_METHOD>\n";
+        outfile << "  <ABS>" << m_settings->getUseAbs() << "</ABS>\n";
+        outfile << "  <STEP>" << m_settings->getStepSize() << "</STEP>\n";
+        outfile << "  <MIN>" << m_settings->getMinDepth() << "</MIN>\n";
+        outfile << "  <MAX>" << m_settings->getMaxDepth() << "</MAX>\n";
+        outfile << "  <WIDTH>" << m_settings->getWidth() << "</WIDTH>\n";
+        outfile << "  <HEIGHT>" << m_settings->getHeight() << "</HEIGHT>\n";
+        outfile << "  <REFINE>" << m_settings->getDoRefine() << "</REFINE>\n";
+        outfile << "  <WINDOW>" << m_settings->getWindowsize() << "</WINDOW>\n";
+        outfile << "  <MAX_THRESH>" << m_settings->getMaxThreshold() << "</MAX_THRESH>\n";
+        outfile << "  <MIN_AREA>" << m_settings->getContourMinArea() << "</MIN_AREA>\n";
+        outfile << "  <MERGE>" << m_settings->getDoMergebounds() << "</MERGE>\n";
+        outfile << "  <MERGE_DEPTH>" << m_settings->getMergeThresholdDepth() << "</MERGE_DEPTH>\n";
+        outfile << "  <MERGE_DIST>" << m_settings->getMergeThresholdDist() << "</MERGE_DIST>\n";
+        outfile << "  <SCOPE>" << m_settings->getMicroscope() << "</SCOPE>\n";
+	outfile << "  <STS>" << m_settings->getScreenToSource() << "</STS>\n";
+        outfile << "  <PS>" << m_settings->getPixelSize() << "</PS>\n";	
+	outfile << "</SETTINGS>" << std::endl;
 
+	outfile << "</doc>" << std::endl;
 	outfile.close();
 }
 
@@ -293,7 +324,9 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 					} else {
 						cv::Point p2 = bound_orig.tl() - bound_cont.tl();	
 						unsigned char d2 = d_mask.at<unsigned char>(row - p2.y, col - p2.x);
-						if (d2 == 0) pixel[2] = 255 * 0.3 + 0.7 * pixel[2];
+						if (d2 == 0) {
+							pixel[2] = 255 * 0.3 + 0.7 * pixel[2];
+						}	
 					}
 					
 					m.at<cv::Vec3b>(row, col) = pixel;
