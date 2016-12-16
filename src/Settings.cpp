@@ -43,11 +43,15 @@ Settings::Settings(const char* filename)
 	//pixel to real units conversion settings
 	screen_to_source = 100000;
 	pixel_size = 7.4;
+	scope = "Submersible_2000";
 
 	maxImageCacheStorage = 500;
 
 	useSharpness = false;
 	methodSharpness = 2;
+
+	saveIntensity = false;
+	savePngImages = false;
 
 	tinyxml2::XMLDocument doc;
 	if (doc.LoadFile(filename) == tinyxml2::XML_SUCCESS){
@@ -208,6 +212,38 @@ Settings::Settings(const char* filename)
 		if (titleElement) {
 			methodSharpness = std::stoi(std::string(titleElement->GetText()));
 			std::cerr << "methodSharpness = " << methodSharpness << std::endl;
+		}
+
+		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("saveIntensity");
+		if (titleElement) {
+			saveIntensity = std::stoi(std::string(titleElement->GetText()));
+			std::cerr << "saveIntensity = " << saveIntensity << std::endl;
+		}
+
+		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("savePngImages");
+		if (titleElement) {
+			savePngImages = std::stoi(std::string(titleElement->GetText()));
+			std::cerr << "savePngImages = " << savePngImages << std::endl;
+		}
+
+		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("microscope");
+		if (titleElement) {
+			scope = std::string(titleElement->GetText());
+			std::cerr << "microscope = " << scope << std::endl;
+
+			if (scope == "Desktop") {
+				screen_to_source = 20000;
+				pixel_size = 7.4;
+			} else if (scope == "Submersible_750") {
+				screen_to_source = 34000;
+				pixel_size = 7.4;
+			} else if (scope == "Submersible_2000") {
+				screen_to_source = 100000;
+				pixel_size = 7.4;
+			} else if (scope == "Cuvette") {
+				screen_to_source = 90000;
+				pixel_size = 5.3;
+			}
 		}
 	}
 }

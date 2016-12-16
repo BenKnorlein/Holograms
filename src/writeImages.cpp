@@ -14,6 +14,8 @@
 	#endif
 
 	#include <windows.h>
+	#define THREAD_SAVING 
+	#include "ThreadedImageSaver.h"
 #else
 	#include <sys/stat.h>
 	#include <sys/types.h>
@@ -28,6 +30,10 @@ std::string slash = "/";
 
 void writeImages(std::string filename, Settings * settings, std::string background = "")
 {
+#ifdef _MSC_VER
+	ThreadedImageSaver* saver = new ThreadedImageSaver(settings);
+#endif
+
 	int width = settings->getWidth();
 	int height = settings->getHeight();
 	std::string datafolder = settings->getDatafolder();
@@ -45,86 +51,110 @@ void writeImages(std::string filename, Settings * settings, std::string backgrou
 
 	OctopusClient * client = new OctopusClient(settings->getIp(), settings->getPort());
 
-	std::cout << "Loading " << datafolder + "/" + filename << std::endl;
+	//std::cout << "Loading " << datafolder + "/" + filename << std::endl;
 	if (background != ""){
-		std::cout << "Use Background " << datafolder + "/" + background << std::endl;
+		//std::cout << "Use Background " << datafolder + "/" + background << std::endl;
 	}
 
 	if (!client->setSourceHologram(datafolder + "/", filename, background))exit;
 
 	std::string name;
 	for (int d = start; d <= stop; d += step_width){
-		std::cerr << "Save amplitude " << d << std::endl;
+		//std::cerr << "Save amplitude " << d << std::endl;
 		float* data = new float[width * height];
 		client->getAmplitudeImage(d, data);
 
+		if (settings->getSavePngImages()){
+			cv::Mat image(cv::Size(width, height), CV_32FC1, data);
+
+			cv::Mat image_disp;
+			cv::Mat B;
+			normalize(image, image_disp, 0, 255, CV_MINMAX);
+			image_disp.convertTo(B, CV_8U);
+
+			imwrite(outFile + slash + "Amplitude_" + std::to_string(d) + ".png", B);
+
+			image.release();
+		}
+
 		name = outFile + slash + "Amplitude_" + std::to_string(d) + ".ext";
+#ifdef THREAD_SAVING
+		saver->add(name, data);
+#else
 		FILE* file = fopen(name.c_str(), "wb");
 		fwrite(data, sizeof(float), width * height, file);
 		fclose(file);
-
-		cv::Mat image(cv::Size(width, height), CV_32FC1, data);
-
-		cv::Mat image_disp;
-		cv::Mat B;
-		normalize(image, image_disp, 0, 255, CV_MINMAX);
-		image_disp.convertTo(B, CV_8U);
-
-		imwrite(outFile + slash + "Amplitude_" + std::to_string(d) + ".png", B);
-
-		image.release();
 		delete[] data;
+#endif
+		
 	}
 
-	for (int d = start; d <= stop; d += step_width){
-		std::cerr << "Save Intensity " << d << std::endl;
-		float* data = new float[width * height];
-		client->getIntensityImage(d, data);
+	if (settings->getSaveIntensity()){
+		for (int d = start; d <= stop; d += step_width){
+			//std::cerr << "Save Intensity " << d << std::endl;
+			float* data = new float[width * height];
+			client->getIntensityImage(d, data);
+	
+			if (settings->getSavePngImages()){
+				cv::Mat image(cv::Size(width, height), CV_32FC1, data);
 
-		name = outFile + slash + "Intensity_" + std::to_string(d) + ".ext";
-		FILE* file = fopen(name.c_str(), "wb");
-		fwrite(data, sizeof(float), width * height, file);
-		fclose(file);
+				cv::Mat image_disp;
+				cv::Mat B;
+				normalize(image, image_disp, 0, 255, CV_MINMAX);
+				image_disp.convertTo(B, CV_8U);
 
-		cv::Mat image(cv::Size(width, height), CV_32FC1, data);
+				imwrite(outFile + slash + "Intensity_" + std::to_string(d) + ".png", B);
 
-		cv::Mat image_disp;
-		cv::Mat B;
-		normalize(image, image_disp, 0, 255, CV_MINMAX);
-		image_disp.convertTo(B, CV_8U);
+				image.release();
+			}
 
-		imwrite(outFile + slash + "Intensity_" + std::to_string(d) + ".png", B);
-
-		image.release();
-		delete[] data;
+			name = outFile + slash + "Intensity_" + std::to_string(d) + ".ext";
+#ifdef THREAD_SAVING
+			saver->add(name, data);
+#else
+			FILE* file = fopen(name.c_str(), "wb");
+			fwrite(data, sizeof(float), width * height, file);
+			fclose(file);
+			delete[] data;
+#endif
+		}
 	}
 
-	std::cout << "Loading " << datafolder + "/" + filename << std::endl;
+	//std::cout << "Loading " << datafolder + "/" + filename << std::endl;
 	if (!client->setSourceHologram(datafolder + "/", filename))exit;
 
 	for (int d = start; d <= stop; d += step_width){
-		std::cerr << "Save phase " << d << std::endl;
+		//std::cerr << "Save phase " << d << std::endl;
 		float* data = new float[width * height];
 		client->getPhaseImage(d, data);
+		
+		if (settings->getSavePngImages()){
+			cv::Mat image(cv::Size(width, height), CV_32FC1, data);
+
+			cv::Mat image_disp;
+			cv::Mat B;
+			normalize(image, image_disp, 0, 255, CV_MINMAX);
+			image_disp.convertTo(B, CV_8U);
+
+			imwrite(outFile + slash + "Phase_" + std::to_string(d) + ".png", B);
+
+			image.release();
+		}
 
 		name = outFile + slash + "Phase_" + std::to_string(d) + ".ext";
+#ifdef THREAD_SAVING
+		saver->add(name, data);
+#else
 		FILE* file = fopen(name.c_str(), "wb");
-
 		fwrite(data, sizeof(float), width * height, file);
 		fclose(file);
-
-		cv::Mat image(cv::Size(width, height), CV_32FC1, data);
-
-		cv::Mat image_disp;
-		cv::Mat B;
-		normalize(image, image_disp, 0, 255, CV_MINMAX);
-		image_disp.convertTo(B, CV_8U);
-
-		imwrite(outFile + slash + "Phase_" + std::to_string(d) + ".png", B);
-
-		image.release();
 		delete[] data;
+#endif
 	}
+
+#ifdef _MSC_VER
+	delete saver;
+#endif
 }
 
 int main(int argc, char** argv)

@@ -158,11 +158,19 @@ void ImageCache::removeOldestImage()
 
 void ImageCache::removeBorders(cv::Mat* image, int depth)
 {
+	int depth1 = 3000;
+	int depth2 = 7000;
+
+	if (m_settings->getMicroscope() == "Submersible_750") {
+		depth1 = 960;
+		depth2 = 2240;
+	}
+
 	int size = 100;
-	if (depth < 3000){
+	if (depth < depth1){
 		size = 300;
 	}
-	else if (depth < 7000)
+	else if (depth < depth2)
 	{
 		size = 150;
 	}

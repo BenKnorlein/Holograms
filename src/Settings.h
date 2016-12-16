@@ -143,6 +143,21 @@ public:
 		return methodSharpness;
 	}
 
+	const std::string& getMicroscope() const
+	{
+		return scope;
+	}
+
+	const bool& getSaveIntensity() const
+	{
+		return saveIntensity;
+	}
+
+	const bool& getSavePngImages() const
+	{
+		return savePngImages;
+	}
+
 protected:
 
 protected:
@@ -188,13 +203,20 @@ protected:
 	//pixel to real units conversion settings
 	int screen_to_source;
 	int pixel_size;
-
+	
 	//ImageCache 
 	int maxImageCacheStorage;
 
 	//SharpnessProcessing
 	bool useSharpness;
 	int methodSharpness;
+
+	//Microscope
+	std::string scope;
+
+	//WriteImages
+	bool saveIntensity;
+	bool savePngImages;
 };
 
 #endif //SETTINGS_H

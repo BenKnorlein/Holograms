@@ -70,6 +70,7 @@ SET(HEADERS
 	src/ContourDetection.h
 	src/Contour.h
 	src/ContourMerge.h
+	src/PhaseExperiments.h
 	src/SharpnessDetection.h
 )
 
@@ -85,8 +86,20 @@ SET(SOURCES
 	src/ContourDetection.cpp
 	src/Contour.cpp
 	src/ContourMerge.cpp
+	src/PhaseExperiments.cpp
 	src/SharpnessDetection.cpp
 )
+
+if(MSVC OR MSVC_IDE)
+	SET(SOURCES
+		${SOURCES}
+		src/ThreadedImageSaver.cpp
+	)
+	SET(HEADERS
+		${HEADERS}
+		src/ThreadedImageSaver.h
+	)
+ENDIF(MSVC OR MSVC_IDE)
 
 SOURCE_GROUP(_CORE FILES ${HEADERS} ${SOURCES} )
 
