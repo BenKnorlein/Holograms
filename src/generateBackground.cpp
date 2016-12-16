@@ -53,9 +53,16 @@ int main(int argc, char** argv)
 	{
 		std::istringstream iss(line);
 		cv::Mat im = cv::imread(line);
-		images.push_back(im);
+		if (im.data == NULL)
+		{
+			std::cerr << "Could not load " << line << std::endl;
+		}
+		else{
+			std::cerr << "Loaded " << line << std::endl;
+			images.push_back(im);
+		}
 	}
-
+	infile.close();
 	cv::Mat im_out;
 	images[0].copyTo(im_out);
 
@@ -72,8 +79,9 @@ int main(int argc, char** argv)
 			im_out.at<cv::Vec3b>(y, x)[1] = out_value;
 			im_out.at<cv::Vec3b>(y, x)[2] = out_value;
 		}
+		
 	}
-
+	
 	cv::imwrite(filename_out, im_out);
 	return 1;
 }
