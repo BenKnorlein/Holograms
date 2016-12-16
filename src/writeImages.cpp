@@ -171,7 +171,7 @@ int main(int argc, char** argv)
 
 	std::string background = "";
 
-	if (argc >= 3) background = std::string(argv[3]);
+	if (argc >= 4) background = std::string(argv[3]);
 
 	writeImages(filename, settings, background);
 
