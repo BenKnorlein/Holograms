@@ -90,6 +90,17 @@ SET(SOURCES
 	src/SharpnessDetection.cpp
 )
 
+if(MSVC OR MSVC_IDE)
+	SET(SOURCES
+		${SOURCES}
+		src/ThreadedImageSaver.cpp
+	)
+	SET(HEADERS
+		${HEADERS}
+		src/ThreadedImageSaver.h
+	)
+ENDIF(MSVC OR MSVC_IDE)
+
 SOURCE_GROUP(_CORE FILES ${HEADERS} ${SOURCES} )
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
@@ -108,8 +119,22 @@ ADD_EXECUTABLE(writeImages ${GUI_TYPE}
 		${HEADERS}
 )
 
+ADD_EXECUTABLE(testScore ${GUI_TYPE}
+		src/testScore.cpp
+		${SOURCES} 
+		${HEADERS}
+)
+
+ADD_EXECUTABLE(generateBackground ${GUI_TYPE}
+		src/generateBackground.cpp
+		${SOURCES} 
+		${HEADERS}
+)
+
 IF (APPLE)
   add_dependencies(${PROJECT_NAME} osx_bundle_dirs )
 ENDIF (APPLE)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(writeImages ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(testScore ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(generateBackground ${OpenCV_LIBS})

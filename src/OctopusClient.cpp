@@ -57,6 +57,8 @@ bool OctopusClient::setSourceHologram(std::string folder, std::string filename, 
 	m_background = background;
 	m_filename = filename;
 	m_folder = folder;
+	if (m_folder.back() != '/')m_folder.append("/");
+
 	std::string backgroundString = "";
 	if (m_background != "")
 	{
@@ -97,7 +99,7 @@ void OctopusClient::receiveImageData(int depth, float* data)
 
 	std::string expectedReplyCutoff = "TREAM_RECONSTRUCTION 2048 2048 " + m_filename + " " + m_background + " " + std::to_string(depth) + " " + std::to_string(m_mode) + "\n" + std::to_string(datasize) + "\n";
 
-	Sleep(500);
+	//Sleep(500);
 	m_sock->receiveMessage(m_dummyBuffer, expectedReply.size());
 #ifdef DEBUG
 	std::cout << "dummyBuffer:" << m_dummyBuffer << std::endl;

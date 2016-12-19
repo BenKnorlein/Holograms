@@ -133,7 +133,7 @@ int main(int argc, char** argv)
 	writer->writeXMLReport(contours, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());
 	writer->saveROIImages(cache, contours);
 	writer->saveContourImage(contours, settings);
-
+	writer->writeSplatImage(contours, cache);
 ////////Cleanup
 	delete settings;
 	delete cache->getImageSource();

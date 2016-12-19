@@ -50,6 +50,9 @@ Settings::Settings(const char* filename)
 	useSharpness = false;
 	methodSharpness = 2;
 
+	saveIntensity = false;
+	savePngImages = false;
+
 	tinyxml2::XMLDocument doc;
 	if (doc.LoadFile(filename) == tinyxml2::XML_SUCCESS){
 
@@ -209,6 +212,18 @@ Settings::Settings(const char* filename)
 		if (titleElement) {
 			methodSharpness = std::stoi(std::string(titleElement->GetText()));
 			std::cerr << "methodSharpness = " << methodSharpness << std::endl;
+		}
+
+		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("saveIntensity");
+		if (titleElement) {
+			saveIntensity = std::stoi(std::string(titleElement->GetText()));
+			std::cerr << "saveIntensity = " << saveIntensity << std::endl;
+		}
+
+		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("savePngImages");
+		if (titleElement) {
+			savePngImages = std::stoi(std::string(titleElement->GetText()));
+			std::cerr << "savePngImages = " << savePngImages << std::endl;
 		}
 
 		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("microscope");

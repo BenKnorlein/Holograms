@@ -20,6 +20,7 @@ public:
 	~ReportWriter();
 
 	void writeXMLReport(std::vector<Contour*> contours, double time);
+	void writeSplatImage(std::vector<Contour*> contours, ImageCache* cache);
 	void saveROIImages(ImageCache* cache, std::vector<Contour*> contours);
 	void saveImage(cv::Mat image, std::string filename, bool normalizeImage = false);
 	void saveContourImage(std::vector<Contour*> contours, Settings * settings);
