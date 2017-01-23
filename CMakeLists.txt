@@ -131,6 +131,12 @@ ADD_EXECUTABLE(generateBackground ${GUI_TYPE}
 		${HEADERS}
 )
 
+ADD_EXECUTABLE(scheduler ${GUI_TYPE}
+		src/scheduler.cpp
+		${SOURCES} 
+		${HEADERS}
+)
+
 IF (APPLE)
   add_dependencies(${PROJECT_NAME} osx_bundle_dirs )
 ENDIF (APPLE)
@@ -138,3 +144,4 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(writeImages ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(testScore ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(generateBackground ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(scheduler ${OpenCV_LIBS})

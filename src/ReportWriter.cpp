@@ -258,7 +258,7 @@ std::string type2str(int type) {
 
 void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contours)
 {
-	for (size_t c = 0; c < contours.size(); c++)
+	/*for (size_t c = 0; c < contours.size(); c++)
 	{
 		std::cout << "Save Contour " << c << " at depth " << std::to_string(((long long)contours[c]->getDepth())) << std::endl;
 		int d = contours[c]->getDepth();
@@ -283,7 +283,7 @@ void ReportWriter::saveROIImages(ImageCache* cache, std::vector<Contour*> contou
 		image_display.convertTo(drawing, CV_8U);
 
 		cv::imwrite(m_outdir + "/" + "contoursPhase_" + std::to_string(((long long)c)) + ".png", drawing);
-	}
+	}*/
 
 	for (size_t c = 0; c < contours.size(); c++)
 	{

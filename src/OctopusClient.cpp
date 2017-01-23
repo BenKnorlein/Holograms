@@ -95,9 +95,9 @@ void OctopusClient::receiveImageData(int depth, float* data)
 	m_sock->sendMessage(message);
 
 	//receive data
-	std::string expectedReply = "STREAM_RECONSTRUCTION 2048 2048 " + m_filename + " " + m_background + " " + std::to_string(depth) + " " + std::to_string(m_mode) + "\n" + std::to_string(datasize) + "\n";
+	std::string expectedReply = "STREAM_RECONSTRUCTION 2048 2048 " + m_background + " " + m_filename + " " + std::to_string(depth) + " " + std::to_string(m_mode) + "\n" + std::to_string(datasize) + "\n";
 
-	std::string expectedReplyCutoff = "TREAM_RECONSTRUCTION 2048 2048 " + m_filename + " " + m_background + " " + std::to_string(depth) + " " + std::to_string(m_mode) + "\n" + std::to_string(datasize) + "\n";
+	std::string expectedReplyCutoff = "TREAM_RECONSTRUCTION 2048 2048 " + m_background + " " + m_filename + " " + std::to_string(depth) + " " + std::to_string(m_mode) + "\n" + std::to_string(datasize) + "\n";
 
 	//Sleep(500);
 	m_sock->receiveMessage(m_dummyBuffer, expectedReply.size());

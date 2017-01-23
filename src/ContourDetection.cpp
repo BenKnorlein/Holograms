@@ -10,7 +10,7 @@
 
 ContourDetection::ContourDetection(ImageCache * cache, Settings * settings) : m_cache(cache), m_settings(settings)
 {
-	m_image_maximum = cv::Mat(cv::Size(m_settings->getWidth(), m_settings->getHeight()), CV_32FC1, cvScalar(0));
+	m_image_maximum = cv::Mat(cv::Size(m_settings->getWidth(), m_settings->getHeight()), CV_32FC1, cvScalar(-1000));
 	m_image_depth = cv::Mat(cv::Size(m_settings->getWidth(), m_settings->getHeight()), CV_32SC1, cvScalar(0));
 }
 

@@ -42,7 +42,7 @@ cv::Mat* ImageCache::getPhaseImage(int depth)
 		m_mode.push_back(2);
 		m_depths.push_back(depth);
 		idx = m_images.size() - 1;
-		removeBorders(&(m_images[idx]), depth);
+		//removeBorders(&(m_images[idx]), depth);
 	}
 	
 	return &(m_images[idx]);
@@ -64,7 +64,7 @@ cv::Mat* ImageCache::getIntensityImage(int depth)
 		m_mode.push_back(0);
 		m_depths.push_back(depth);
 		idx = m_images.size() - 1;
-		removeBorders(&(m_images[idx]), depth);
+		//removeBorders(&(m_images[idx]), depth);
 	}
 
 	return &(m_images[idx]);
@@ -86,7 +86,7 @@ cv::Mat* ImageCache::getAmplitudeImage(int depth)
 		m_mode.push_back(1);
 		m_depths.push_back(depth);
 		idx = m_images.size() - 1;
-		removeBorders(&(m_images[idx]), depth);
+		//removeBorders(&(m_images[idx]), depth);
 	}
 
 	return &(m_images[idx]);
@@ -105,7 +105,10 @@ cv::Mat* ImageCache::getGradientImage(int depth)
 		m_source->getAmplitudeImage(depth, data);
 		cv::Mat image(cv::Size(m_width, m_height), CV_32FC1, data);
 
-		cv::divide(image, cv::Scalar(m_conversionToWorld / depth), image);
+		//cv::divide(image, cv::Scalar(m_conversionToWorld / depth), image);
+
+		double mean = cv::mean(image)[0];
+		image = image / mean;
 
 		cv::Mat gradImage;
 		switch (m_settings->getMethodSharpness()){

@@ -153,6 +153,11 @@ public:
 		return saveIntensity;
 	}
 
+	const bool& getSavePhase() const
+	{
+		return savePhase;
+	}
+
 	const bool& getSavePngImages() const
 	{
 		return savePngImages;
@@ -216,6 +221,7 @@ protected:
 
 	//WriteImages
 	bool saveIntensity;
+	bool savePhase;
 	bool savePngImages;
 };
 

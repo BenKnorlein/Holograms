@@ -120,36 +120,38 @@ void writeImages(std::string filename, Settings * settings, std::string backgrou
 		}
 	}
 
-	//std::cout << "Loading " << datafolder + "/" + filename << std::endl;
-	if (!client->setSourceHologram(datafolder + "/", filename))exit;
+	if (settings->getSavePhase()){
+		//std::cout << "Loading " << datafolder + "/" + filename << std::endl;
+		if (!client->setSourceHologram(datafolder + "/", filename))exit;
 
-	for (int d = start; d <= stop; d += step_width){
-		//std::cerr << "Save phase " << d << std::endl;
-		float* data = new float[width * height];
-		client->getPhaseImage(d, data);
-		
-		if (settings->getSavePngImages()){
-			cv::Mat image(cv::Size(width, height), CV_32FC1, data);
+		for (int d = start; d <= stop; d += step_width){
+			//std::cerr << "Save phase " << d << std::endl;
+			float* data = new float[width * height];
+			client->getPhaseImage(d, data);
 
-			cv::Mat image_disp;
-			cv::Mat B;
-			normalize(image, image_disp, 0, 255, CV_MINMAX);
-			image_disp.convertTo(B, CV_8U);
+			if (settings->getSavePngImages()){
+				cv::Mat image(cv::Size(width, height), CV_32FC1, data);
 
-			imwrite(outFile + slash + "Phase_" + std::to_string(d) + ".png", B);
+				cv::Mat image_disp;
+				cv::Mat B;
+				normalize(image, image_disp, 0, 255, CV_MINMAX);
+				image_disp.convertTo(B, CV_8U);
 
-			image.release();
-		}
+				imwrite(outFile + slash + "Phase_" + std::to_string(d) + ".png", B);
 
-		name = outFile + slash + "Phase_" + std::to_string(d) + ".ext";
+				image.release();
+			}
+
+			name = outFile + slash + "Phase_" + std::to_string(d) + ".ext";
 #ifdef THREAD_SAVING
-		saver->add(name, data);
+			saver->add(name, data);
 #else
-		FILE* file = fopen(name.c_str(), "wb");
-		fwrite(data, sizeof(float), width * height, file);
-		fclose(file);
-		delete[] data;
+			FILE* file = fopen(name.c_str(), "wb");
+			fwrite(data, sizeof(float), width * height, file);
+			fclose(file);
+			delete[] data;
 #endif
+		}
 	}
 
 #ifdef _MSC_VER

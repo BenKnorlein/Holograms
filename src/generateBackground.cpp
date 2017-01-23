@@ -3,6 +3,7 @@
 ///\date 08/10/2016
 
 #include <iostream>
+#include "tinyxml2.h"
 
 #ifdef _MSC_VER
 	#define _CRT_SECURE_NO_WARNINGS
@@ -20,6 +21,7 @@
 #include <fstream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
 using namespace cv;
 
@@ -33,56 +35,167 @@ typename std::iterator_traits<It>::value_type Median(It begin, It end)
 	return *std::next(begin, size / 2);
 }
 
+bool hasEnding(std::string const &fullString, std::string const &ending) {
+	if (fullString.length() >= ending.length()) {
+		return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
+	}
+	else {
+		return false;
+	}
+}
+
+int countFiles(std::string dir)
+{
+	int files = 0;
+#ifdef _MSC_VER	
+	HANDLE hFind;
+	WIN32_FIND_DATA data;
+	std::string search = dir + "\\*.*";
+	hFind = FindFirstFile(search.c_str(), &data);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			files++;
+		} while (FindNextFile(hFind, &data));
+		FindClose(hFind);
+	}
+	
+#endif
+	return files;
+}
+
+std::vector <std::string> readBMP(std::string folder)
+{
+	std::vector<std::string> files;
+#ifdef _MSC_VER	
+	HANDLE hFind;
+	WIN32_FIND_DATA data;	
+	std::string search = folder + "\\*.bmp";
+	hFind = FindFirstFile(search.c_str(), &data);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			if (hasEnding(data.cFileName, ".bmp"))
+				files.push_back(data.cFileName);
+		} while (FindNextFile(hFind, &data));
+		FindClose(hFind);
+	}
+	std::sort(files.begin(), files.end());
+#endif
+	return files;
+}
+
+void copyFile(std::string in, std::string out)
+{
+#ifdef _MSC_VER	
+	CopyFile(in.c_str(), out.c_str(), FALSE);
+#endif
+}
+
 int main(int argc, char** argv)
 {
-
-	if (argc < 3)
+	if (argc < 5)
 	{
-		std::cerr << "You need to provide an output filename and a list of images in a txt file" << std::endl;
+		std::cerr << "You need to provide: input directory, Images used for median, step size and at least 1 output directory " << std::endl;
 		return 0;
 	}
 
-	std::string filename_out = std::string(argv[1]);
-	std::string filename = std::string(argv[2]);
-
-	std::vector<cv::Mat> images;
-
-	std::ifstream infile(filename);
-	std::string line;
-	while (std::getline(infile, line))
+	std::string inputdir = std::string(argv[1]);
+	int nbMedian = std::atoi(argv[2]);
+	int step = std::atoi(argv[3]);
+	std::vector<std::string> outputs;
+	for (int i = 0; i < argc - 4; i++)
 	{
-		std::istringstream iss(line);
-		cv::Mat im = cv::imread(line);
-		if (im.data == NULL)
-		{
-			std::cerr << "Could not load " << line << std::endl;
-		}
-		else{
-			std::cerr << "Loaded " << line << std::endl;
-			images.push_back(im);
-		}
+		outputs.push_back( std::string(argv[i+4]));
+		std::cerr << "Save to " << outputs[i] << std::endl;
 	}
-	infile.close();
-	cv::Mat im_out;
-	images[0].copyTo(im_out);
 
-	for (int y = 0; y < im_out.rows; y++){
-		for (int x = 0; x < im_out.cols; x++){
-			//std::cerr << (int)im_out.at<cv::Vec3b>(y, x)[0] << " " << (int)im_out.at<cv::Vec3b>(y, x)[1] << " " << (int)im_out.at<cv::Vec3b>(y, x)[2] << std::endl;
+	std::cerr << std::endl;
 
-			std::vector<unsigned char> values;
-			for (int i = 0; i < images.size(); i++){
-				values.push_back(images[i].at<cv::Vec3b>(y, x)[0]);
-			}
-			unsigned char out_value = Median(values.begin(), values.end());
-			im_out.at<cv::Vec3b>(y, x)[0] = out_value;
-			im_out.at<cv::Vec3b>(y, x)[1] = out_value;
-			im_out.at<cv::Vec3b>(y, x)[2] = out_value;
-		}
-		
-	}
+	std::vector<std::string> files = readBMP(inputdir);
 	
-	cv::imwrite(filename_out, im_out);
+	int current = 0;
+	while (current + nbMedian <= files.size()){
+		std::vector<cv::Mat> images;
+		for (int i = 0; i < nbMedian; i++)
+		{
+			std::string filename_tmp = inputdir + "\\" + files[current + i];
+			cv::Mat im = cv::imread(filename_tmp);
+			if (im.data == NULL)
+			{
+				std::cerr << "Could not load " << filename_tmp << std::endl;
+			}
+			else{
+				std::cerr << "Loaded " << filename_tmp << std::endl;
+				images.push_back(im);
+			}
+		}
+
+		cv::Mat im_out;
+		images[0].copyTo(im_out);
+
+		for (int y = 0; y < im_out.rows; y++){
+			for (int x = 0; x < im_out.cols; x++){
+				//std::cerr << (int)im_out.at<cv::Vec3b>(y, x)[0] << " " << (int)im_out.at<cv::Vec3b>(y, x)[1] << " " << (int)im_out.at<cv::Vec3b>(y, x)[2] << std::endl;
+
+				std::vector<unsigned char> values;
+				for (int i = 0; i < images.size(); i++){
+					values.push_back(images[i].at<cv::Vec3b>(y, x)[0]);
+				}
+				unsigned char out_value = Median(values.begin(), values.end());
+				im_out.at<cv::Vec3b>(y, x)[0] = out_value;
+				im_out.at<cv::Vec3b>(y, x)[1] = out_value;
+				im_out.at<cv::Vec3b>(y, x)[2] = out_value;
+			}
+
+		}
+
+		int middle = current + nbMedian -1 ;// / 2;
+
+		std::string outdir;
+		int outDirMin = std::numeric_limits<int>::max();
+
+		for (int i = 0; i < outputs.size(); i++)
+		{
+			int count = countFiles(outputs[i]);
+			if (count < outDirMin)
+			{
+				outDirMin = count;
+				outdir = outputs[i];
+			}
+		} 
+
+		
+		copyFile(inputdir + "\\" + files[middle], outdir + "\\" + files[middle]);
+		std::string outputFilenameBackground = files[middle].substr(0, files[middle].length() - 4) + "_background.bmp";
+		cv::imwrite(outdir + "\\" + outputFilenameBackground, im_out);
+
+		std::string outputFilenameXML = outdir + "\\" + files[middle].substr(0, files[middle].length() - 4) + ".xml";
+		FILE * xml_file = fopen(outputFilenameXML.c_str(), "w");
+		tinyxml2::XMLPrinter printer(xml_file);
+		printer.OpenElement("Processing");
+		printer.OpenElement("Step1");
+		printer.OpenElement("Image");
+		printer.PushText(files[middle].c_str());
+		printer.CloseElement();
+		printer.OpenElement("Background");
+		printer.PushText(outputFilenameBackground.c_str());
+		printer.CloseElement();
+		printer.OpenElement("OriginalFolder");
+		printer.PushText(inputdir.c_str());
+		printer.CloseElement();
+		for (int i = 0; i < nbMedian; i++)
+		{
+			std::string filename_tmp = files[current + i];
+			printer.OpenElement("ImageUsedForBackground");
+			printer.PushText(filename_tmp.c_str());
+			printer.CloseElement();
+		}
+
+		printer.CloseElement();
+		printer.CloseElement();
+		fclose(xml_file);
+		current += step;
+		std::cerr << std::endl;
+	}
 	return 1;
 }
 

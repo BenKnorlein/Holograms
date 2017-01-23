@@ -51,6 +51,7 @@ Settings::Settings(const char* filename)
 	methodSharpness = 2;
 
 	saveIntensity = false;
+	savePhase = false;
 	savePngImages = false;
 
 	tinyxml2::XMLDocument doc;
@@ -218,6 +219,12 @@ Settings::Settings(const char* filename)
 		if (titleElement) {
 			saveIntensity = std::stoi(std::string(titleElement->GetText()));
 			std::cerr << "saveIntensity = " << saveIntensity << std::endl;
+		}
+
+		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("savePhase");
+		if (titleElement) {
+			savePhase = std::stoi(std::string(titleElement->GetText()));
+			std::cerr << "savePhase = " << savePhase << std::endl;
 		}
 
 		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("savePngImages");
