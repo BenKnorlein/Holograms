@@ -11,7 +11,7 @@
 	#ifndef WITH_CONSOLE
 		#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 	#endif
-
+		std::string slash = "\\";
 	#include <windows.h>
 #else
 	#include <dirent.h>
@@ -20,6 +20,7 @@
 	#include <sys/sendfile.h>  // sendfile
 	#include <sys/stat.h>
 	#include <sys/types.h>
+std::string slash = "/";
 #endif
 
 #include <fstream>
@@ -29,7 +30,8 @@
 
 using namespace cv;
 
-std::string slash = "/"; 
+
+
 
 template <typename It>
 typename std::iterator_traits<It>::value_type Median(It begin, It end)
@@ -161,7 +163,7 @@ int main(int argc, char** argv)
 		std::vector<cv::Mat> images;
 		for (int i = 0; i < nbMedian; i++)
 		{
-			std::string filename_tmp = inputdir + "\\" + files[current + i];
+			std::string filename_tmp = inputdir + slash + files[current + i];
 			cv::Mat im = cv::imread(filename_tmp);
 			if (im.data == NULL)
 			{
@@ -192,7 +194,7 @@ int main(int argc, char** argv)
 
 		}
 
-		int middle = current + nbMedian -1 ;// / 2;
+		int middle = current + nbMedian / 2;
 
 		std::string outdir;
 		int outDirMin = std::numeric_limits<int>::max();
@@ -208,11 +210,11 @@ int main(int argc, char** argv)
 		} 
 
 		
-		copyFile(inputdir + "\\" + files[middle], outdir + "\\" + files[middle]);
+		copyFile(inputdir + slash + files[middle], outdir + slash + files[middle]);
 		std::string outputFilenameBackground = files[middle].substr(0, files[middle].length() - 4) + "_background.bmp";
-		cv::imwrite(outdir + "\\" + outputFilenameBackground, im_out);
+		cv::imwrite(outdir + slash + outputFilenameBackground, im_out);
 
-		std::string outputFilenameXML = outdir + "\\" + files[middle].substr(0, files[middle].length() - 4) + ".xml";
+		std::string outputFilenameXML = outdir + slash + files[middle].substr(0, files[middle].length() - 4) + ".xml";
 		FILE * xml_file = fopen(outputFilenameXML.c_str(), "w");
 		tinyxml2::XMLPrinter printer(xml_file);
 		printer.OpenElement("Processing");
