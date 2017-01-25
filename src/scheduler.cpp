@@ -132,7 +132,11 @@ int main(int argc, char** argv)
 				if (titleElement) {
 					outdir = (titleElement->GetText() != 0) ? titleElement->GetText() : "";
 				}
-			
+				
+				copyFile("Z://FK170124//holograms//Settings//Settings_90.xml", outdir + "//" + filename + "//" + "//Settings_90.xml");
+				copyFile("Z://FK170124//holograms//Settings//Settings_95.xml", outdir + "//" + filename + "//" + "//Settings_95.xml");
+				copyFile("Z://FK170124//holograms//Settings//Settings_97.xml", outdir + "//" + filename + "//" + "//Settings_97.xml");
+
 				outdir = outdir + "//" + filename + "//" + "data";
 				makeDirectory(outdir);
 
@@ -140,6 +144,7 @@ int main(int argc, char** argv)
 				moveFile(inputdir + "//" + files[0], outdir + "//" + files[0]);
 				moveFile(inputdir + "//" + filename, outdir + "//" + filename);
 				moveFile(inputdir + "//" + backgroundFilename, outdir + "//" + backgroundFilename);
+				
 			}
 			std::cerr << "Done" << std::endl;
 		}

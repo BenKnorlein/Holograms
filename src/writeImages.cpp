@@ -177,7 +177,11 @@ int main(int argc, char** argv)
 
 	writeImages(filename, settings, background);
 
-	std::string command = "plink SOI \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/Settings/Settings.xml &> /dev/null &\"";
+	std::string command = "plink SOI1 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "Settings_90.xml &> /dev/null &\"";
+	system(command.c_str());
+	command = "plink SOI2 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "Settings_95.xml &> /dev/null &\"";
+	system(command.c_str());
+	command = "plink SOI3 \"sudo \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "Settings_97.xml &> /dev/null &\"";
 	system(command.c_str());
 
 	delete settings;
