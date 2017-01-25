@@ -60,7 +60,7 @@ void writeImages(std::string filename, Settings * settings, std::string backgrou
 
 	std::string name;
 	for (int d = start; d <= stop; d += step_width){
-		//std::cerr << "Save amplitude " << d << std::endl;
+		std::cerr << "Save amplitude " << d << std::endl;
 		float* data = new float[width * height];
 		client->getAmplitudeImage(d, data);
 
@@ -176,6 +176,9 @@ int main(int argc, char** argv)
 	if (argc >= 4) background = std::string(argv[3]);
 
 	writeImages(filename, settings, background);
+
+	std::string command = "plink SOI \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/Settings/Settings.xml &> /dev/null &\"";
+	system(command.c_str());
 
 	delete settings;
 	return 1;

@@ -75,6 +75,13 @@ void moveFile(std::string in, std::string out)
 #endif
 }
 
+void copyFile(std::string in, std::string out)
+{
+#ifdef _MSC_VER	
+	CopyFile(in.c_str(), out.c_str(), FALSE);
+#endif
+}
+
 int main(int argc, char** argv)
 {
 	if (argc < 3)
@@ -129,6 +136,7 @@ int main(int argc, char** argv)
 				outdir = outdir + "//" + filename + "//" + "data";
 				makeDirectory(outdir);
 
+				copyFile(settings, outdir + "//Settings_Writing.xml");
 				moveFile(inputdir + "//" + files[0], outdir + "//" + files[0]);
 				moveFile(inputdir + "//" + filename, outdir + "//" + filename);
 				moveFile(inputdir + "//" + backgroundFilename, outdir + "//" + backgroundFilename);

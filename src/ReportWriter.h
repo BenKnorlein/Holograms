@@ -19,6 +19,7 @@ public:
 	ReportWriter(Settings *settings, std::string filename);
 	~ReportWriter();
 
+	void writeRawReport(std::vector<Contour*> contours, double time);
 	void writeXMLReport(std::vector<Contour*> contours, double time);
 	void writeSplatImage(std::vector<Contour*> contours, ImageCache* cache);
 	void saveROIImages(ImageCache* cache, std::vector<Contour*> contours);

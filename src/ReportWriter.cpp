@@ -45,6 +45,108 @@ ReportWriter::~ReportWriter()
 	
 }
 
+void ReportWriter::writeRawReport(std::vector<Contour*> contours, double time)
+{
+	std::ofstream outfile(m_outdir + "/" + "report.xml", std::ofstream::out);
+	outfile << "<doc>" << std::endl;
+	outfile << "<DATA>" << std::endl;
+	outfile << "<FILENAME>" << m_filename << "</FILENAME>" << std::endl;
+	outfile << "<CONTOURSPLATIMAGE>contoursSplat.png</CONTOURSPLATIMAGE>" << std::endl;
+	outfile << "<CONTOURIMAGE>contours.png</CONTOURIMAGE>" << std::endl;
+	outfile << "<MAXIMAGE>maximum.png</MAXIMAGE>" << std::endl;
+	outfile << "<DEPTHIMAGE>depthImage.png</DEPTHIMAGE>" << std::endl;
+	outfile << "<TIME>" << time << "</TIME>" << std::endl;
+
+	for (size_t c = 0; c < contours.size(); c++)
+	{
+		float x_pixel = (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).x * 0.5;
+		float y_pixel = (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).y * 0.5;
+		int width_pixel = contours[c]->getBoundingBox().width;
+		int height_pixel = contours[c]->getBoundingBox().height;
+		int area_pixel = contours[c]->getArea();
+		int depth = contours[c]->getDepth();
+		float scalar = reconPixelSize(depth);
+		float x = (x_pixel - m_width * 0.5) * scalar;
+		float y = (y_pixel - m_width * 0.5) * scalar;
+		float width = width_pixel * scalar;
+		float height = height_pixel * scalar;
+		float area = area_pixel * scalar * scalar;
+
+		outfile << "<ROI>" << std::endl;
+		outfile << "<CONTOUR>" << c << "</CONTOUR>" << std::endl;
+
+		outfile << "<X_PIXEL>" << x_pixel << "</X_PIXEL>" << std::endl;
+		outfile << "<X>" << x << "</X>" << std::endl;
+		outfile << "<Y_PIXEL>" << y_pixel << "</Y_PIXEL>" << std::endl;
+		outfile << "<Y>" << y << "</Y>" << std::endl;
+
+		outfile << "<WIDTH_PIXEL>" << width_pixel << "</WIDTH_PIXEL>" << std::endl;
+		outfile << "<WIDTH>" << width << "</WIDTH>" << std::endl;
+		outfile << "<HEIGHT_PIXEL>" << height_pixel << "</HEIGHT_PIXEL>" << std::endl;
+		outfile << "<HEIGHT>" << height << "</HEIGHT>" << std::endl;
+
+		outfile << "<DEPTH>" << depth << "</DEPTH>" << std::endl;
+
+		outfile << "<AREA_PIXEL>" << area_pixel << "</AREA_PIXEL>" << std::endl;
+		outfile << "<AREA>" << area << "</AREA>" << std::endl;
+
+		outfile << "<MAXVAL>" << contours[c]->getMaxValue() << "</MAXVAL>" << std::endl;
+		outfile << "<MINVAL>" << *std::min_element(contours[c]->getValues()->begin(), contours[c]->getValues()->end()) << "</MINVAL>" << std::endl;
+		outfile << "<IMAGE>" << "contoursMasked_" + std::to_string(((long long)c)) + ".png" << "</IMAGE>" << std::endl;
+		outfile << "<IMAGEPHASE>" << "contoursPhase_" + std::to_string(((long long)c)) + ".png" << "</IMAGEPHASE>" << std::endl;
+		outfile << "<IMAGESCORE>" << "contoursScore_" + std::to_string(((long long)c)) + ".png" << "</IMAGESCORE>" << std::endl;
+		outfile << "</ROI>" << std::endl;
+
+		int bounds[2] = { 0, 50 };
+		cv::Mat plot = plotGraph(*contours[c]->getValues(), bounds);
+		cv::imwrite(m_outdir + "/" + "contoursScore_" + std::to_string(((long long)c)) + ".png", plot);
+
+		std::string filename = m_outdir + "/" + "contoursScore_" + std::to_string(((long long)c)) + ".csv";
+		std::ofstream outfile(filename);
+		outfile.precision(12);
+		for (int i = 0; i < (int)contours[c]->getValues()->size() - 1; i++)
+		{
+			outfile << (*contours[c]->getValues())[i] << std::endl;
+		}
+
+		outfile.close();
+	}
+	outfile << "</DATA>" << std::endl;
+
+	outfile << "<SETTINGS>" << std::endl;
+	outfile << "  <DF>" << m_settings->getDatafolder() << "</DF>\n";
+	outfile << "  <OF>" << m_settings->getOutputFolder() << "</OF>\n";
+	outfile << "  <TF>" << m_settings->getTemplateFolder() << "</TF>\n";
+	outfile << "  <QCF>" << m_settings->getQCfolder() << "</QCF>\n";
+	outfile << "  <ONLINE>" << m_settings->getOnline() << "</ONLINE>\n";
+	outfile << "  <IP>" << m_settings->getIp() << "</IP>\n";
+	outfile << "  <PORT>" << m_settings->getPort() << "</PORT>\n";
+	outfile << "  <SHOW>" << m_settings->getShow() << "</SHOW>\n";
+	outfile << "  <MICS>" << m_settings->getMaxImageCacheStorage() << "</MICS>\n";
+	outfile << "  <SHARP>" << m_settings->getUseSharpness() << "</SHARP>\n";
+	outfile << "  <SHARP_METHOD>" << m_settings->getMethodSharpness() << "</SHARP_METHOD>\n";
+	outfile << "  <ABS>" << m_settings->getUseAbs() << "</ABS>\n";
+	outfile << "  <STEP>" << m_settings->getStepSize() << "</STEP>\n";
+	outfile << "  <MIN>" << m_settings->getMinDepth() << "</MIN>\n";
+	outfile << "  <MAX>" << m_settings->getMaxDepth() << "</MAX>\n";
+	outfile << "  <WIDTH>" << m_settings->getWidth() << "</WIDTH>\n";
+	outfile << "  <HEIGHT>" << m_settings->getHeight() << "</HEIGHT>\n";
+	outfile << "  <REFINE>" << m_settings->getDoRefine() << "</REFINE>\n";
+	outfile << "  <WINDOW>" << m_settings->getWindowsize() << "</WINDOW>\n";
+	outfile << "  <MAX_THRESH>" << m_settings->getMaxThreshold() << "</MAX_THRESH>\n";
+	outfile << "  <MIN_AREA>" << m_settings->getContourMinArea() << "</MIN_AREA>\n";
+	outfile << "  <MERGE>" << m_settings->getDoMergebounds() << "</MERGE>\n";
+	outfile << "  <MERGE_DEPTH>" << m_settings->getMergeThresholdDepth() << "</MERGE_DEPTH>\n";
+	outfile << "  <MERGE_DIST>" << m_settings->getMergeThresholdDist() << "</MERGE_DIST>\n";
+	outfile << "  <SCOPE>" << m_settings->getMicroscope() << "</SCOPE>\n";
+	outfile << "  <STS>" << m_settings->getScreenToSource() << "</STS>\n";
+	outfile << "  <PS>" << m_settings->getPixelSize() << "</PS>\n";
+	outfile << "</SETTINGS>" << std::endl;
+
+	outfile << "</doc>" << std::endl;
+	outfile.close();
+}
+
 void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 {
 	std::ifstream infile;
@@ -175,6 +277,16 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 		int bounds[2] = { 0, 50 };
 		cv::Mat plot = plotGraph(*contours[c]->getValues(), bounds);
 		cv::imwrite(m_outdir + "/" + "contoursScore_" + std::to_string(((long long)c)) + ".png", plot);
+
+		std::string filename = m_outdir + "/" + "contoursScore_" + std::to_string(((long long)c)) + ".csv";
+		std::ofstream outfile(filename);
+		outfile.precision(12);
+		for (int i = 0; i < (int) contours[c]->getValues()->size() - 1; i++)
+		{
+			outfile << (*contours[c]->getValues())[i] << std::endl;
+		}
+		
+		outfile.close();
 	}
 	outfile << "</DATA>" << std::endl;
 	

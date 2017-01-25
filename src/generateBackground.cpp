@@ -14,6 +14,9 @@
 
 	#include <windows.h>
 #else
+	#include <dirent.h>
+	#include <fcntl.h>         // open
+	#include <sys/sendfile.h>  // sendfile
 	#include <sys/stat.h>
 	#include <sys/types.h>
 #endif
@@ -44,6 +47,12 @@ bool hasEnding(std::string const &fullString, std::string const &ending) {
 	}
 }
 
+bool has_suffix(const std::string &str, const std::string &suffix)
+{
+	return str.size() >= suffix.size() &&
+		str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
 int countFiles(std::string dir)
 {
 	int files = 0;
@@ -58,7 +67,17 @@ int countFiles(std::string dir)
 		} while (FindNextFile(hFind, &data));
 		FindClose(hFind);
 	}
-	
+#else
+	DIR *dp;
+	struct dirent *dirp;
+	if ((dp = opendir(dir.c_str())) == NULL) {
+		return 0;
+	}
+
+	while ((dirp = readdir(dp)) != NULL && has_suffix(std::string(dirp->d_name), ".bmp") ) {
+		files++;
+	}									
+	closedir(dp);
 #endif
 	return files;
 }
@@ -78,8 +97,20 @@ std::vector <std::string> readBMP(std::string folder)
 		} while (FindNextFile(hFind, &data));
 		FindClose(hFind);
 	}
-	std::sort(files.begin(), files.end());
+#else
+	DIR *dp;
+	struct dirent *dirp;
+	if ((dp = opendir(folder.c_str())) == NULL) {
+		return files;
+	}
+
+	while ((dirp = readdir(dp)) != NULL && has_suffix(std::string(dirp->d_name), ".bmp")) {
+		files.push_back(std::string(dirp->d_name));
+	}
+	closedir(dp);
 #endif
+
+	std::sort(files.begin(), files.end());
 	return files;
 }
 
@@ -87,6 +118,18 @@ void copyFile(std::string in, std::string out)
 {
 #ifdef _MSC_VER	
 	CopyFile(in.c_str(), out.c_str(), FALSE);
+#else
+	int source = open(in.c_str(), O_RDONLY, 0);
+	int dest = open(out.c_str(), O_WRONLY | O_CREAT /*| O_TRUNC/**/, 0644);
+
+	// struct required, rationale: function stat() exists also
+	struct stat stat_source;
+	fstat(source, &stat_source);
+
+	sendfile(dest, source, 0, stat_source.st_size);
+
+	close(source);
+	close(dest);
 #endif
 }
 

@@ -22,6 +22,8 @@
 #endif
 #include <windows.h>
 #else
+#include <fcntl.h>         // open
+#include <sys/sendfile.h>  // sendfile
 #include <sys/stat.h>
 #include <sys/types.h>
 #endif
@@ -40,6 +42,25 @@ using namespace cv;
 
 std::string slash = "/"; 
 
+void copyFile(std::string in, std::string out)
+{
+#ifdef _MSC_VER	
+	CopyFile(in.c_str(), out.c_str(), FALSE);
+#else
+	int source = open(in.c_str(), O_RDONLY, 0);
+	int dest = open(out.c_str(), O_WRONLY | O_CREAT /*| O_TRUNC/**/, 0644);
+
+	// struct required, rationale: function stat() exists also
+	struct stat stat_source;
+	fstat(source, &stat_source);
+
+	sendfile(dest, source, 0, stat_source.st_size);
+
+	close(source);
+	close(dest);
+#endif
+}
+
 int main(int argc, char** argv)
 {
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -54,12 +75,21 @@ int main(int argc, char** argv)
 	Settings * settings = new Settings(argv[2]);
 
 	std::string outFile = settings->getOutputFolder() + slash + filename;
-
+	std::string outDirData = settings->getOutputFolder() + slash + filename + slash + "data";
 #ifdef _MSC_VER
 	CreateDirectory(outFile.c_str(), NULL);
+	CreateDirectory(outDirData.c_str(), NULL);
 #else
 	mkdir(outFile.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	mkdir(outDirData.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #endif
+	std::string inDirData = settings->getDatafolder() + slash + filename + slash + "data";
+	size_t lastindex = filename.find_last_of(".");
+	std::string rawfilename = filename.substr(0, lastindex);
+	copyFile(inDirData + slash + filename, outDirData + slash + filename);
+	copyFile(inDirData + slash + rawfilename + ".xml", outDirData + slash + rawfilename + ".xml");
+	copyFile(inDirData + slash + rawfilename + "_background.bmp", outDirData + slash + rawfilename + "_background.bmp");
+	copyFile(inDirData + slash + "Settings_Writing.xml", outDirData + slash + "Settings_Writing.xml");
 
 	//setup ReportWriter
 	//ReportWriter * writer = new ReportWriter(settings->getOutputFolder(), filename);
@@ -131,6 +161,7 @@ int main(int argc, char** argv)
 ////////Create Report
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	writer->writeXMLReport(contours, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());
+	writer->writeRawReport(contours, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());
 	writer->saveROIImages(cache, contours);
 	writer->saveContourImage(contours, settings);
 	writer->writeSplatImage(contours, cache);
