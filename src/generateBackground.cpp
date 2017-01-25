@@ -16,6 +16,7 @@
 #else
 	#include <dirent.h>
 	#include <fcntl.h>         // open
+	#include <unistd.h>  // read, write, close
 	#include <sys/sendfile.h>  // sendfile
 	#include <sys/stat.h>
 	#include <sys/types.h>
