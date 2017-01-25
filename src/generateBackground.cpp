@@ -77,8 +77,10 @@ int countFiles(std::string dir)
 		return 0;
 	}
 
-	while ((dirp = readdir(dp)) != NULL && has_suffix(std::string(dirp->d_name), ".bmp") ) {
-		files++;
+	while ((dirp = readdir(dp)) != NULL){
+		if(has_suffix(std::string(dirp->d_name), ".bmp")) {
+			files++;
+		}
 	}									
 	closedir(dp);
 #endif
@@ -107,8 +109,10 @@ std::vector <std::string> readBMP(std::string folder)
 		return files;
 	}
 
-	while ((dirp = readdir(dp)) != NULL && has_suffix(std::string(dirp->d_name), ".bmp")) {
-		files.push_back(std::string(dirp->d_name));
+	while ((dirp = readdir(dp)) != NULL){
+		if(has_suffix(std::string(dirp->d_name), ".bmp")) {
+			files.push_back(std::string(dirp->d_name));
+		}
 	}
 	closedir(dp);
 #endif
