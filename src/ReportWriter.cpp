@@ -47,7 +47,7 @@ ReportWriter::~ReportWriter()
 
 void ReportWriter::writeRawReport(std::vector<Contour*> contours, double time)
 {
-	std::ofstream outfile(m_outdir + "/" + "report.xml", std::ofstream::out);
+	std::ofstream outfile(m_outdir + "/" + "reportRaw.xml", std::ofstream::out);
 	outfile << "<doc>" << std::endl;
 	outfile << "<DATA>" << std::endl;
 	outfile << "<FILENAME>" << m_filename << "</FILENAME>" << std::endl;
