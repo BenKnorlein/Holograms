@@ -93,6 +93,8 @@ id ID #REQUIRED>
 							<th>Contour</th>
 							<th>X</th>
 							<th>Y</th>
+							<th>ESD</th>
+							<th>ESV</th>
 							<th>Width</th>
 							<th>Height</th>
 							<th>Depth</th>
@@ -107,6 +109,8 @@ id ID #REQUIRED>
 								<td><xsl:value-of select="CONTOUR"/></td>
 								<td><xsl:value-of select="X"/></td>
 								<td><xsl:value-of select="Y"/></td>
+								<td><xsl:value-of select="ESD"/></td>
+								<td><xsl:value-of select="ESV"/></td>
 								<td><xsl:value-of select="WIDTH"/></td>
 								<td><xsl:value-of select="HEIGHT"/></td>
 								<td><xsl:value-of select="DEPTH"/></td>

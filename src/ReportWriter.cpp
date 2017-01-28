@@ -56,6 +56,7 @@ void ReportWriter::writeRawReport(std::vector<Contour*> contours, double time)
 	outfile << "<MAXIMAGE>maximum.png</MAXIMAGE>" << std::endl;
 	outfile << "<DEPTHIMAGE>depthImage.png</DEPTHIMAGE>" << std::endl;
 	outfile << "<TIME>" << time << "</TIME>" << std::endl;
+	outfile << "<NBCONTOURS>" << contours.size() << "</NBCONTOURS>" << std::endl;
 
 	for (size_t c = 0; c < contours.size(); c++)
 	{
@@ -71,6 +72,8 @@ void ReportWriter::writeRawReport(std::vector<Contour*> contours, double time)
 		float width = width_pixel * scalar;
 		float height = height_pixel * scalar;
 		float area = area_pixel * scalar * scalar;
+		float esd = sqrt( area * 6 / CV_PI) ;
+		float esv = CV_PI * pow(esd, 3) / 6;
 
 		outfile << "<ROI>" << std::endl;
 		outfile << "<CONTOUR>" << c << "</CONTOUR>" << std::endl;
@@ -79,12 +82,14 @@ void ReportWriter::writeRawReport(std::vector<Contour*> contours, double time)
 		outfile << "<X>" << x << "</X>" << std::endl;
 		outfile << "<Y_PIXEL>" << y_pixel << "</Y_PIXEL>" << std::endl;
 		outfile << "<Y>" << y << "</Y>" << std::endl;
+		outfile << "<ESD>" << esd << "</ESD>" << std::endl;
+		outfile << "<ESV>" << esv << "</ESV>" << std::endl;
 
 		outfile << "<WIDTH_PIXEL>" << width_pixel << "</WIDTH_PIXEL>" << std::endl;
 		outfile << "<WIDTH>" << width << "</WIDTH>" << std::endl;
 		outfile << "<HEIGHT_PIXEL>" << height_pixel << "</HEIGHT_PIXEL>" << std::endl;
 		outfile << "<HEIGHT>" << height << "</HEIGHT>" << std::endl;
-
+		
 		outfile << "<DEPTH>" << depth << "</DEPTH>" << std::endl;
 
 		outfile << "<AREA_PIXEL>" << area_pixel << "</AREA_PIXEL>" << std::endl;
@@ -233,9 +238,10 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 	outfile << "<MAXIMAGE>maximum.png</MAXIMAGE>" << std::endl;
 	outfile << "<DEPTHIMAGE>depthImage.png</DEPTHIMAGE>" << std::endl;
 	outfile << "<TIME>" << time << "</TIME>" << std::endl;
-
+	outfile << "<NBCONTOURS>" << contours.size() << "</NBCONTOURS>" << std::endl;
 	for (size_t c = 0; c < contours.size(); c++)
 	{
+	
 		float x_pixel = (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).x * 0.5;
 		float y_pixel = (contours[c]->getBoundingBox().tl() + contours[c]->getBoundingBox().br()).y * 0.5;
 		int width_pixel = contours[c]->getBoundingBox().width;
@@ -248,6 +254,8 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 		float width = width_pixel * scalar;
 		float height = height_pixel * scalar;
 		float area = area_pixel * scalar * scalar;
+		float esd = 2 * sqrt(area / CV_PI);
+		float esv = CV_PI * pow(esd,3) / 6 ;
 
 		outfile << "<ROI>" << std::endl;
 		outfile << "<CONTOUR>" << c << "</CONTOUR>" << std::endl;
@@ -256,7 +264,9 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 		outfile << "<X>" << x << "</X>" << std::endl;
 		outfile << "<Y_PIXEL>" << y_pixel << "</Y_PIXEL>" << std::endl;
 		outfile << "<Y>" << y << "</Y>" << std::endl;
-		
+		outfile << "<ESD>" << esd << "</ESD>" << std::endl;
+		outfile << "<ESV>" << esv << "</ESV>" << std::endl;
+
 		outfile << "<WIDTH_PIXEL>" << width_pixel << "</WIDTH_PIXEL>" << std::endl;
 		outfile << "<WIDTH>" << width << "</WIDTH>" << std::endl;
 		outfile << "<HEIGHT_PIXEL>" << height_pixel << "</HEIGHT_PIXEL>" << std::endl;

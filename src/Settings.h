@@ -163,6 +163,11 @@ public:
 		return savePngImages;
 	}
 
+	const bool& getStartRemote() const
+	{
+		return startRemote;
+	}
+
 protected:
 
 protected:
@@ -223,6 +228,8 @@ protected:
 	bool saveIntensity;
 	bool savePhase;
 	bool savePngImages;
+
+	bool startRemote;
 };
 
 #endif //SETTINGS_H

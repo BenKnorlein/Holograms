@@ -90,6 +90,8 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
+	bool serverA = 0;
+
 	std::string inputdir = std::string(argv[1]);
 	std::string settings = std::string(argv[2]);
 
@@ -118,7 +120,16 @@ int main(int argc, char** argv)
 				{
 					backgroundFilename = (titleElement->GetText() != 0) ? titleElement->GetText() : "";
 				}
-				std::string command = "writeImages.exe " + filename + " " + settings + " " + backgroundFilename;
+				
+				
+				std::string command;
+				if (serverA){
+					command = "writeImages.exe " + filename + " " + settings + " " + backgroundFilename + " 0";
+				}
+				else 
+				{
+					command = "writeImages.exe " + filename + " " + settings + " " + backgroundFilename + " 1";
+				}
 				system(command.c_str());
 
 				
@@ -133,10 +144,6 @@ int main(int argc, char** argv)
 					outdir = (titleElement->GetText() != 0) ? titleElement->GetText() : "";
 				}
 				
-				copyFile("Z://FK170124//holograms//Settings//Settings_90.xml", outdir + "//" + filename + "//" + "//Settings_90.xml");
-				copyFile("Z://FK170124//holograms//Settings//Settings_95.xml", outdir + "//" + filename + "//" + "//Settings_95.xml");
-				copyFile("Z://FK170124//holograms//Settings//Settings_97.xml", outdir + "//" + filename + "//" + "//Settings_97.xml");
-
 				outdir = outdir + "//" + filename + "//" + "data";
 				makeDirectory(outdir);
 
@@ -146,6 +153,7 @@ int main(int argc, char** argv)
 				moveFile(inputdir + "//" + backgroundFilename, outdir + "//" + backgroundFilename);
 				
 			}
+			serverA = !serverA;
 			std::cerr << "Done" << std::endl;
 		}
 		else{

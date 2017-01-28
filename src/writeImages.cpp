@@ -5,6 +5,7 @@
 #include "OctopusClient.h"
 #include "Settings.h"
 #include <iostream>
+#include <fstream>
 
 #ifdef _MSC_VER
 	#define _CRT_SECURE_NO_WARNINGS
@@ -27,6 +28,13 @@
 using namespace cv;
 
 std::string slash = "/"; 
+
+void copyFile(std::string in, std::string out)
+{
+#ifdef _MSC_VER	
+	CopyFile(in.c_str(), out.c_str(), FALSE);
+#endif
+}
 
 void writeImages(std::string filename, Settings * settings, std::string background = "")
 {
@@ -172,17 +180,46 @@ int main(int argc, char** argv)
 	Settings * settings = new Settings(argv[2]);
 
 	std::string background = "";
-
+	int serverA = 0;
 	if (argc >= 4) background = std::string(argv[3]);
+	if (argc >= 5) serverA = std::atoi(argv[4]);
 
+	
 	writeImages(filename, settings, background);
 
-	std::string command = "plink SOI1 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "Settings_90.xml &> /dev/null &\"";
-	system(command.c_str());
-	command = "plink SOI2 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "Settings_95.xml &> /dev/null &\"";
-	system(command.c_str());
-	command = "plink SOI3 \"sudo \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "Settings_97.xml &> /dev/null &\"";
-	system(command.c_str());
+	copyFile("Z://FK170124//holograms//Settings//Settings_90.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_90.xml");
+	copyFile("Z://FK170124//holograms//Settings//Settings_95.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_95.xml");
+	copyFile("Z://FK170124//holograms//Settings//Settings_98.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_98.xml");
+
+	if (settings->getStartRemote()){	
+		std::string command;
+		if (serverA == 0){
+			command = "plink SOI1 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_90.xml &> /dev/null &\"";
+			system(command.c_str());
+			command = "plink SOI2 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_95.xml &> /dev/null &\"";
+			system(command.c_str());
+			command = "plink SOI3 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_98.xml &> /dev/null &\"";
+			system(command.c_str());
+		}
+		else
+		{
+			command = "plink SOI4 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_90.xml &> /dev/null &\"";
+			system(command.c_str());
+			command = "plink SOI5 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_95.xml &> /dev/null &\"";
+			system(command.c_str());
+			command = "plink SOI6 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_98.xml &> /dev/null &\"";
+			system(command.c_str());
+		}
+	}
+	else
+	{
+		std::string outbatchFile = settings->getOutputFolder() + slash + "batch" + std::to_string(serverA);
+		std::ofstream outfile(filename, std::ios::out | std::ios::app);
+		outfile << "sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_90.xml" << std::endl;
+		outfile << "sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_95.xml" << std::endl;
+		outfile << "sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_98.xml" << std::endl;
+		outfile.close();
+	}
 
 	delete settings;
 	return 1;

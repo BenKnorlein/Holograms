@@ -54,6 +54,8 @@ Settings::Settings(const char* filename)
 	savePhase = false;
 	savePngImages = false;
 
+	startRemote = false;
+
 	tinyxml2::XMLDocument doc;
 	if (doc.LoadFile(filename) == tinyxml2::XML_SUCCESS){
 
@@ -231,6 +233,12 @@ Settings::Settings(const char* filename)
 		if (titleElement) {
 			savePngImages = std::stoi(std::string(titleElement->GetText()));
 			std::cerr << "savePngImages = " << savePngImages << std::endl;
+		}
+
+		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("startRemote");
+		if (titleElement) {
+			startRemote = std::stoi(std::string(titleElement->GetText()));
+			std::cerr << "startRemote = " << startRemote << std::endl;
 		}
 
 		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("microscope");
