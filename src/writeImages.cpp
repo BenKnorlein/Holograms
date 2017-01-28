@@ -59,11 +59,11 @@ void writeImages(std::string filename, Settings * settings, std::string backgrou
 
 	OctopusClient * client = new OctopusClient(settings->getIp(), settings->getPort());
 
-	//std::cout << "Loading " << datafolder + "/" + filename << std::endl;
+	std::cout << "Loading " << datafolder + "/" + filename << std::endl;
 	if (background != ""){
-		//std::cout << "Use Background " << datafolder + "/" + background << std::endl;
+		std::cout << "Use Background " << datafolder + "/" + background << std::endl;
 	}
-
+	
 	if (!client->setSourceHologram(datafolder + "/", filename, background))exit;
 
 	std::string name;
@@ -214,7 +214,8 @@ int main(int argc, char** argv)
 	else
 	{
 		std::string outbatchFile = settings->getOutputFolder() + slash + "batch" + std::to_string(serverA);
-		std::ofstream outfile(filename, std::ios::out | std::ios::app);
+		std::cerr << "Write to " << outbatchFile << std::endl;
+		std::ofstream outfile(outbatchFile, std::ofstream::out | std::ofstream::app);
 		outfile << "sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_90.xml" << std::endl;
 		outfile << "sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_95.xml" << std::endl;
 		outfile << "sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_98.xml" << std::endl;

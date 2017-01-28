@@ -6,6 +6,7 @@
 #include "tinyxml2.h"
 #include <vector>
 #include <algorithm>
+#include <string>
 
 #ifdef _MSC_VER
 	#define _CRT_SECURE_NO_WARNINGS
@@ -90,11 +91,12 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
-	bool serverA = 0;
+	int serverA = 0;
 
 	std::string inputdir = std::string(argv[1]);
 	std::string settings = std::string(argv[2]);
-
+	int nbServers = std::atoi(argv[3]);
+	std::cerr << nbServers << " servers" << std::endl;
 	while (1){
 		std::vector<std::string> files = readXML(inputdir);
 		if (files.size() > 0)
@@ -123,13 +125,9 @@ int main(int argc, char** argv)
 				
 				
 				std::string command;
-				if (serverA){
-					command = "writeImages.exe " + filename + " " + settings + " " + backgroundFilename + " 0";
-				}
-				else 
-				{
-					command = "writeImages.exe " + filename + " " + settings + " " + backgroundFilename + " 1";
-				}
+			
+				command = "writeImages.exe " + filename + " " + settings + " " + backgroundFilename + " " + std::to_string(serverA);
+				std::cerr << "Running : " << command << std::endl;
 				system(command.c_str());
 
 				
@@ -153,7 +151,8 @@ int main(int argc, char** argv)
 				moveFile(inputdir + "//" + backgroundFilename, outdir + "//" + backgroundFilename);
 				
 			}
-			serverA = !serverA;
+			serverA++;
+			serverA = serverA % nbServers;
 			std::cerr << "Done" << std::endl;
 		}
 		else{

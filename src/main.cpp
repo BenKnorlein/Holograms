@@ -61,6 +61,116 @@ void copyFile(std::string in, std::string out)
 #endif
 }
 
+int DeleteDirectory(const std::string &refcstrRootDirectory)
+{
+#ifdef _MSC_VER	
+	bool            bSubdirectory = false;       // Flag, indicating whether
+	// subdirectories have been found
+	HANDLE          hFile;                       // Handle to directory
+	std::string     strFilePath;                 // Filepath
+	std::string     strPattern;                  // Pattern
+	WIN32_FIND_DATA FileInformation;             // File information
+
+
+	strPattern = refcstrRootDirectory + "\\*.*";
+	hFile = ::FindFirstFile(strPattern.c_str(), &FileInformation);
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			if (FileInformation.cFileName[0] != '.')
+			{
+				strFilePath.erase();
+				strFilePath = refcstrRootDirectory + "\\" + FileInformation.cFileName;
+
+				if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				{
+					// Delete subdirectory
+					int iRC = DeleteDirectory(strFilePath);
+					if (iRC)
+						return iRC;;
+				}
+				else
+				{
+					// Set file attributes
+					if (::SetFileAttributes(strFilePath.c_str(),
+						FILE_ATTRIBUTE_NORMAL) == FALSE)
+						return ::GetLastError();
+
+					// Delete file
+					if (::DeleteFile(strFilePath.c_str()) == FALSE)
+						return ::GetLastError();
+				}
+			}
+		} while (::FindNextFile(hFile, &FileInformation) == TRUE);
+
+		// Close handle
+		::FindClose(hFile);
+
+		DWORD dwError = ::GetLastError();
+		if (dwError != ERROR_NO_MORE_FILES)
+			return dwError;
+		else
+		{
+			if (!bSubdirectory)
+			{
+				// Set directory attributes
+				if (::SetFileAttributes(refcstrRootDirectory.c_str(),
+					FILE_ATTRIBUTE_NORMAL) == FALSE)
+					return ::GetLastError();
+
+				// Delete directory
+				if (::RemoveDirectory(refcstrRootDirectory.c_str()) == FALSE)
+					return ::GetLastError();
+			}
+		}
+	}
+#else
+	std::string command = "sudo rm -rf " + refcstrRootDirectory;
+	system(command.c_str());
+#endif
+	return 0;
+}
+
+int countXML(std::string dir)
+{
+	int files = 0;
+#ifdef _MSC_VER	
+	HANDLE hFind;
+	WIN32_FIND_DATA data;
+	std::string search = dir + "\\*.xml";
+	hFind = FindFirstFile(search.c_str(), &data);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			files++;
+		} while (FindNextFile(hFind, &data));
+		FindClose(hFind);
+	}
+#else
+	DIR *dp;
+	struct dirent *dirp;
+	if ((dp = opendir(dir.c_str())) == NULL) {
+		return 0;
+	}
+
+	while ((dirp = readdir(dp)) != NULL){
+		if (has_suffix(std::string(dirp->d_name), ".xml")) {
+			files++;
+		}
+	}
+	closedir(dp);
+#endif
+	return files;
+}
+
+void deleteDirectory(std::string folder)
+{
+	if (countXML(folder) == 0)
+	{
+		deleteDirectory(folder);
+	}
+}
+
 int main(int argc, char** argv)
 {
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -165,6 +275,14 @@ int main(int argc, char** argv)
 	writer->saveROIImages(cache, contours);
 	writer->saveContourImage(contours, settings);
 	writer->writeSplatImage(contours, cache);
+
+///////remove files
+	if (settings->getDeleteTemporary())
+	{
+		remove(argv[2]);
+		deleteDirectory(settings->getDatafolder() + slash + filename);
+	}
+
 ////////Cleanup
 	delete settings;
 	delete cache->getImageSource();

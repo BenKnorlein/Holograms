@@ -55,6 +55,7 @@ Settings::Settings(const char* filename)
 	savePngImages = false;
 
 	startRemote = false;
+	deleteTemporary = false;
 
 	tinyxml2::XMLDocument doc;
 	if (doc.LoadFile(filename) == tinyxml2::XML_SUCCESS){
@@ -241,6 +242,12 @@ Settings::Settings(const char* filename)
 			std::cerr << "startRemote = " << startRemote << std::endl;
 		}
 
+		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("deleteTemporary");
+		if (titleElement) {
+			deleteTemporary = std::stoi(std::string(titleElement->GetText()));
+			std::cerr << "deleteTemporary = " << deleteTemporary << std::endl;
+		}
+		
 		titleElement = doc.FirstChildElement("Settings")->FirstChildElement("microscope");
 		if (titleElement) {
 			scope = std::string(titleElement->GetText());

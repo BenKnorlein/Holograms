@@ -76,7 +76,7 @@ Socket::Socket(const std::string& serverIP, const std::string& serverPort)
 		exit(2);
 	}
 
-	printf("client: connected\n");
+	
 	int iTimeout = 3000;
 	int out = setsockopt(sockfd,
 		SOL_SOCKET,
@@ -92,7 +92,7 @@ Socket::Socket(const std::string& serverIP, const std::string& serverPort)
 
 	_socketFD = sockfd;
 
-
+	printf("client: connected\n");
 #else  // BSD sockets implementation
 
 

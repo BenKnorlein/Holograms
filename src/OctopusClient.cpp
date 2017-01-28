@@ -16,11 +16,13 @@ OctopusClient::OctopusClient(const std::string &serverIP, const std::string &ser
 	// put the software into the special 'receive information through
 	// back door' mode, and should more or less disable the GUI.
 	
+	std::cerr << "Set Api Version" << std::endl;
 	m_sock->sendMessage("SET_API_VERSION 2\n");
 
 	//clear pipe;
 	char buffer[1024];
 
+	std::cerr << "Empty socket" << std::endl;
 	int n;
 	while (((n = recv(*m_sock->getSocketFD(), buffer, sizeof(buffer), 0))>0))
 	{
@@ -29,6 +31,7 @@ OctopusClient::OctopusClient(const std::string &serverIP, const std::string &ser
 			break;
 		}
 	}
+	std::cerr << "Octopus connected" << std::endl;
 }
 
 OctopusClient::~OctopusClient()
@@ -67,7 +70,7 @@ bool OctopusClient::setSourceHologram(std::string folder, std::string filename, 
 
 	m_sock->sendMessage("RECONSTRUCT_HOLOGRAMS " + m_folder + m_filename + backgroundString + "\n0\n");
 
-	Sleep(10);
+	Sleep(100);
 	m_sock->receiveMessage(&m_dummyBuffer[0], 26);
 
 	std::string reply = std::string(m_dummyBuffer, 26);

@@ -168,6 +168,10 @@ public:
 		return startRemote;
 	}
 
+	const bool& getDeleteTemporary() const
+	{
+		return deleteTemporary;
+	}
 protected:
 
 protected:
@@ -230,6 +234,7 @@ protected:
 	bool savePngImages;
 
 	bool startRemote;
+	bool deleteTemporary;
 };
 
 #endif //SETTINGS_H
