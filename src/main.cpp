@@ -22,6 +22,7 @@
 #endif
 #include <windows.h>
 #else
+#include <dirent.h>
 #include <fcntl.h>         // open
 #include <sys/sendfile.h>  // sendfile
 #include <sys/stat.h>
@@ -59,6 +60,12 @@ void copyFile(std::string in, std::string out)
 	close(source);
 	close(dest);
 #endif
+}
+
+bool has_suffix(const std::string &str, const std::string &suffix)
+{
+	return str.size() >= suffix.size() &&
+		str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
 int DeleteDirectory(const std::string &refcstrRootDirectory)
@@ -161,14 +168,6 @@ int countXML(std::string dir)
 	closedir(dp);
 #endif
 	return files;
-}
-
-void deleteDirectory(std::string folder)
-{
-	if (countXML(folder) == 0)
-	{
-		deleteDirectory(folder);
-	}
 }
 
 int main(int argc, char** argv)
@@ -280,7 +279,10 @@ int main(int argc, char** argv)
 	if (settings->getDeleteTemporary())
 	{
 		remove(argv[2]);
-		deleteDirectory(settings->getDatafolder() + slash + filename);
+		if (countXML(settings->getDatafolder() + slash + filename) == 0)
+		{
+			DeleteDirectory(settings->getDatafolder() + slash + filename);
+		}
 	}
 
 ////////Cleanup
