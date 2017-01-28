@@ -41,7 +41,7 @@
 
 using namespace cv;
 
-std::string slash = "/"; 
+std::string slash = "/";
 
 void copyFile(std::string in, std::string out)
 {
@@ -133,8 +133,33 @@ int DeleteDirectory(const std::string &refcstrRootDirectory)
 		}
 	}
 #else
-	std::string command = "sudo rm -rf " + refcstrRootDirectory;
-	system(command.c_str());
+	DIR *dir;
+	struct dirent *entry;
+	char path[256];
+
+	if (path == NULL) {
+		return 0;
+	}
+	dir = opendir(refcstrRootDirectory.c_str());
+	if (dir == NULL) {
+		perror("Error opendir()");
+		return 0;
+	}
+
+	while ((entry = readdir(dir)) != NULL) {
+		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
+			snprintf(path, (size_t)PATH_MAX, "%s/%s", refcstrRootDirectory.c_str(), entry->d_name);
+			if (entry->d_type == DT_DIR) {
+				DeleteDirectory(std::string(path));
+			}
+
+			unlink(path);
+		}
+
+	}
+	closedir(dir);
+
+	rmdir(refcstrRootDirectory.c_str());
 #endif
 	return 0;
 }
@@ -162,6 +187,7 @@ int countXML(std::string dir)
 
 	while ((dirp = readdir(dp)) != NULL){
 		if (has_suffix(std::string(dirp->d_name), ".xml")) {
+			std::cerr << std::string(dirp->d_name) << std::endl;
 			files++;
 		}
 	}
@@ -179,7 +205,7 @@ int main(int argc, char** argv)
 		std::cerr << "You need to provide a filename and a settings.xml" << std::endl;
 		return 0;
 	}
-	
+
 	std::string filename = std::string(argv[1]);
 	Settings * settings = new Settings(argv[2]);
 
@@ -207,15 +233,15 @@ int main(int argc, char** argv)
 	ImageCache * cache;
 	if (settings->getOnline())
 	{
-		cache = new ImageCache(new OctopusClient(settings->getIp(), settings->getPort()),settings, 500);
-	} 
+		cache = new ImageCache(new OctopusClient(settings->getIp(), settings->getPort()), settings, 500);
+	}
 	else
 	{
 		cache = new ImageCache(new OfflineReader(), settings, settings->getMaxImageCacheStorage());
 	}
 	cache->getImageSource()->setSourceHologram(settings->getDatafolder(), filename);
 
-////////Find contours
+	////////Find contours
 	ContourDetection * detector = new ContourDetection(cache, settings);
 	std::vector<Contour *> contours;
 
@@ -223,18 +249,18 @@ int main(int argc, char** argv)
 	writer->saveImage(*detector->getMaxImage(), "maximum.png", true);
 
 	detector->findContours(contours);
-	writer->saveImage(detector->getDepthImage(),"depthImage.png");
+	writer->saveImage(detector->getDepthImage(), "depthImage.png");
 
 	delete detector;
 	writer->saveContourImage(contours, settings);
 
-////////Find best depth for contour
+	////////Find best depth for contour
 	ContourDepthDetection * depthdetector = new ContourDepthDetection(cache, settings);
 	for (int i = 0; i < contours.size(); i++)
 		depthdetector->findBestDepth(contours[i], settings->getMinDepth(), settings->getMaxDepth(), settings->getStepSize());
 	delete depthdetector;
 
-//merge bounds
+	//merge bounds
 	if (settings->getDoMergebounds()){
 		int count = 1;
 		while (count > 0){
@@ -252,7 +278,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-///////Refine depths
+	///////Refine depths
 	if (settings->getDoRefine() && settings->getOnline())
 	{
 		ContourDepthDetection * depthdetector = new ContourDepthDetection(cache, settings);
@@ -261,13 +287,13 @@ int main(int argc, char** argv)
 		delete depthdetector;
 	}
 
-////////Phase Experimetal Testing	
+	////////Phase Experimetal Testing	
 	//PhaseExperiments *pe = new PhaseExperiments(settings, cache, outFile);
 	//pe->randomContourPixels(contours[1], 5, 10000, 12000, 100);
 	//pe->randomContourPixels(contours[3], 10, 10000, 12000, 100);
 	//delete pe;
-	
-////////Create Report
+
+	////////Create Report
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	writer->writeXMLReport(contours, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());
 	writer->writeRawReport(contours, std::chrono::duration_cast<std::chrono::minutes>(end - begin).count());
@@ -275,17 +301,18 @@ int main(int argc, char** argv)
 	writer->saveContourImage(contours, settings);
 	writer->writeSplatImage(contours, cache);
 
-///////remove files
+	///////remove files
 	if (settings->getDeleteTemporary())
 	{
 		remove(argv[2]);
 		if (countXML(settings->getDatafolder() + slash + filename) == 0)
 		{
+			std::cerr << "Deleting" << std::endl;
 			DeleteDirectory(settings->getDatafolder() + slash + filename);
 		}
 	}
 
-////////Cleanup
+	////////Cleanup
 	delete settings;
 	delete cache->getImageSource();
 	delete cache;
