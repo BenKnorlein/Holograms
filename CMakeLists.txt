@@ -131,13 +131,14 @@ ADD_EXECUTABLE(generateBackground ${GUI_TYPE}
 		${HEADERS}
 )
 
+if(MSVC OR MSVC_IDE)
 ADD_EXECUTABLE(scheduler ${GUI_TYPE}
 		src/scheduler.cpp
 		${SOURCES} 
 		${HEADERS}
 )
 
-if(MSVC OR MSVC_IDE)
+
 ADD_EXECUTABLE(reportGenerator ${GUI_TYPE}
 		src/reportGenerator.cpp
 		${SOURCES} 
@@ -152,7 +153,8 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(writeImages ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(testScore ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(generateBackground ${OpenCV_LIBS})
-TARGET_LINK_LIBRARIES(scheduler ${OpenCV_LIBS})
+
 if(MSVC OR MSVC_IDE)
+TARGET_LINK_LIBRARIES(scheduler ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(reportGenerator ${OpenCV_LIBS})
 ENDIF(MSVC OR MSVC_IDE)
