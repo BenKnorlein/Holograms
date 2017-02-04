@@ -77,7 +77,7 @@ Socket::Socket(const std::string& serverIP, const std::string& serverPort)
 	}
 
 	
-	int iTimeout = 3000;
+	int iTimeout = 30000;
 	int out = setsockopt(sockfd,
 		SOL_SOCKET,
 		SO_RCVTIMEO,

@@ -64,8 +64,9 @@ void writeImages(std::string filename, Settings * settings, std::string backgrou
 		std::cout << "Use Background " << datafolder + "/" + background << std::endl;
 	}
 	
+	Sleep(2000);
 	if (!client->setSourceHologram(datafolder + "/", filename, background))exit;
-
+	Sleep(2000);
 	std::string name;
 	for (int d = start; d <= stop; d += step_width){
 		std::cerr << "Save amplitude " << d << std::endl;

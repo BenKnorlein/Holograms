@@ -67,19 +67,20 @@ bool OctopusClient::setSourceHologram(std::string folder, std::string filename, 
 	{
 		backgroundString = "*" + m_folder + m_background;
 	}
-
+	
+	std::cerr << "send message" << std::endl;
 	m_sock->sendMessage("RECONSTRUCT_HOLOGRAMS " + m_folder + m_filename + backgroundString + "\n0\n");
-
-	Sleep(100);
+	std::cerr << "Wait for receive" << std::endl;
+	//Sleep(1000);
 	m_sock->receiveMessage(&m_dummyBuffer[0], 26);
-
+	std::cerr << "Received" << std::endl;
 	std::string reply = std::string(m_dummyBuffer, 26);
 	if (reply != "RECONSTRUCT_HOLOGRAMS 0\n0\n" && reply != "RECONSTRUCT_HOLOGRAMS 1\n0\n" && reply != "RECONSTRUCT_HOLOGRAMS 2\n0\n") {
 		std::cout << "REPLY:" << reply << ", expect:" << "RECONSTRUCT_HOLOGRAMS 0\n0\n or RECONSTRUCT_HOLOGRAMS 1\n0\n or RECONSTRUCT_HOLOGRAMS 2\n0\n" << std::endl;
 		assert(reply == "RECONSTRUCT_HOLOGRAMS 0\n0\n" || reply == "RECONSTRUCT_HOLOGRAMS 1\n0\n" || reply == "RECONSTRUCT_HOLOGRAMS 2\n0\n");
 	}
 
-	if (reply != "RECONSTRUCT_HOLOGRAMS 1\n0\n") return false;
+	//if (reply != "RECONSTRUCT_HOLOGRAMS 1\n0\n") return false;
 #ifdef DEBUG
 	std::cout << reply << std::endl;
 #endif

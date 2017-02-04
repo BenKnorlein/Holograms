@@ -87,6 +87,40 @@ int countFiles(std::string dir)
 	return files;
 }
 
+std::vector <std::string> readTXT(std::string folder)
+{
+	std::vector<std::string> files;
+#ifdef _MSC_VER	
+	HANDLE hFind;
+	WIN32_FIND_DATA data;
+	std::string search = folder + "\\*.txt";
+	hFind = FindFirstFile(search.c_str(), &data);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			if (hasEnding(data.cFileName, ".txt"))
+				files.push_back(data.cFileName);
+		} while (FindNextFile(hFind, &data));
+		FindClose(hFind);
+	}
+#else
+	DIR *dp;
+	struct dirent *dirp;
+	if ((dp = opendir(folder.c_str())) == NULL) {
+		return files;
+	}
+
+	while ((dirp = readdir(dp)) != NULL){
+		if (has_suffix(std::string(dirp->d_name), ".txt")) {
+			files.push_back(std::string(dirp->d_name));
+		}
+	}
+	closedir(dp);
+#endif
+
+	std::sort(files.begin(), files.end());
+	return files;
+}
+
 std::vector <std::string> readBMP(std::string folder)
 {
 	std::vector<std::string> files;
@@ -161,13 +195,22 @@ int main(int argc, char** argv)
 	std::cerr << std::endl;
 
 	std::vector<std::string> files = readBMP(inputdir);
+	std::vector<std::string> files_csv = readTXT(inputdir);
+	std::string start = files_csv[0];
+	std::string end = files_csv[files_csv.size()-1];
+	start = start.substr(0, start.rfind(".")) + ".bmp";
+	end = end.substr(0, end.rfind(".")) + ".bmp";
+
+	int start_pos = std::find(files.begin(), files.end(), start) - files.begin();
+	int end_pos = std::find(files.begin(), files.end(), end) - files.begin();
+
+	int current = start_pos;
 	
-	int current = 0;
-	while (current + nbMedian <= files.size()){
+	while (current <= end_pos){
 		std::vector<cv::Mat> images;
 		for (int i = 0; i < nbMedian; i++)
 		{
-			std::string filename_tmp = inputdir + slash + files[current + i];
+			std::string filename_tmp = inputdir + slash + files[current + i - (nbMedian - 1) / 2];
 			cv::Mat im = cv::imread(filename_tmp);
 			if (im.data == NULL)
 			{
@@ -198,7 +241,7 @@ int main(int argc, char** argv)
 
 		}
 
-		int middle = current + nbMedian / 2;
+		int middle = current;
 
 		std::string outdir;
 		int outDirMin = std::numeric_limits<int>::max();
@@ -214,6 +257,7 @@ int main(int argc, char** argv)
 		} 
 
 		
+		copyFile(inputdir + slash + files[middle].substr(0, files[middle].rfind(".")) + ".txt", outdir + slash + files[middle].substr(0, files[middle].rfind(".")) + ".txt");
 		copyFile(inputdir + slash + files[middle], outdir + slash + files[middle]);
 		std::string outputFilenameBackground = files[middle].substr(0, files[middle].length() - 4) + "_background.bmp";
 		cv::imwrite(outdir + slash + outputFilenameBackground, im_out);

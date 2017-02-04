@@ -137,6 +137,14 @@ ADD_EXECUTABLE(scheduler ${GUI_TYPE}
 		${HEADERS}
 )
 
+if(MSVC OR MSVC_IDE)
+ADD_EXECUTABLE(reportGenerator ${GUI_TYPE}
+		src/reportGenerator.cpp
+		${SOURCES} 
+		${HEADERS}
+)
+ENDIF(MSVC OR MSVC_IDE)
+
 IF (APPLE)
   add_dependencies(${PROJECT_NAME} osx_bundle_dirs )
 ENDIF (APPLE)
@@ -145,3 +153,6 @@ TARGET_LINK_LIBRARIES(writeImages ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(testScore ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(generateBackground ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(scheduler ${OpenCV_LIBS})
+if(MSVC OR MSVC_IDE)
+TARGET_LINK_LIBRARIES(reportGenerator ${OpenCV_LIBS})
+ENDIF(MSVC OR MSVC_IDE)

@@ -223,6 +223,7 @@ int main(int argc, char** argv)
 	std::string rawfilename = filename.substr(0, lastindex);
 	copyFile(inDirData + slash + filename, outDirData + slash + filename);
 	copyFile(inDirData + slash + rawfilename + ".xml", outDirData + slash + rawfilename + ".xml");
+	copyFile(inDirData + slash + rawfilename + ".txt", outDirData + slash + rawfilename + ".txt");
 	copyFile(inDirData + slash + rawfilename + "_background.bmp", outDirData + slash + rawfilename + "_background.bmp");
 	copyFile(inDirData + slash + "Settings_Writing.xml", outDirData + slash + "Settings_Writing.xml");
 
@@ -304,7 +305,7 @@ int main(int argc, char** argv)
 	///////remove files
 	if (settings->getDeleteTemporary())
 	{
-		remove(argv[2]);
+		unlink(argv[2]);
 		if (countXML(settings->getDatafolder() + slash + filename) == 0)
 		{
 			std::cerr << "Deleting" << std::endl;
