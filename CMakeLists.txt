@@ -138,6 +138,11 @@ ADD_EXECUTABLE(scheduler ${GUI_TYPE}
 		${HEADERS}
 )
 
+ADD_EXECUTABLE(refineReports${GUI_TYPE}
+		src/refineReports.cpp
+		${SOURCES} 
+		${HEADERS}
+)
 
 ADD_EXECUTABLE(reportGenerator ${GUI_TYPE}
 		src/reportGenerator.cpp
@@ -155,6 +160,7 @@ TARGET_LINK_LIBRARIES(testScore ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(generateBackground ${OpenCV_LIBS})
 
 if(MSVC OR MSVC_IDE)
+TARGET_LINK_LIBRARIES(refineReports ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(scheduler ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(reportGenerator ${OpenCV_LIBS})
 ENDIF(MSVC OR MSVC_IDE)

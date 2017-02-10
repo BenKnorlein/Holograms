@@ -1,3 +1,23 @@
+//  ----------------------------------
+//  Holograms -- Copyright © 2016, Brown University, Providence, RI.
+//  
+//  All Rights Reserved
+//   
+//  Use of the software is provided under the terms of the GNU General Public License version 3 
+//  as published by the Free Software Foundation at http://www.gnu.org/licenses/gpl-3.0.html, provided 
+//  that this copyright notice appear in all copies and that the name of Brown University not be used in 
+//  advertising or publicity pertaining to the use or distribution of the software without specific written 
+//  prior permission from Brown University.
+//  
+//  BROWN UNIVERSITY DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE WHICH IS 
+//  PROVIDED “AS IS”, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
+//  FOR ANY PARTICULAR PURPOSE.  IN NO EVENT SHALL BROWN UNIVERSITY BE LIABLE FOR ANY 
+//  SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR FOR ANY DAMAGES WHATSOEVER RESULTING 
+//  FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR 
+//  OTHER TORTIOUS ACTION, OR ANY OTHER LEGAL THEORY, ARISING OUT OF OR IN CONNECTION 
+//  WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
+//  ----------------------------------
+//  
 ///\file main.cpp
 ///\author Benjamin Knorlein
 ///\date 08/10/2016
@@ -185,27 +205,33 @@ int main(int argc, char** argv)
 	std::string inputdir = std::string(argv[1]);
 	int nbMedian = std::atoi(argv[2]);
 	int step = std::atoi(argv[3]);
+	bool useCTDData = std::atoi(argv[4]);
 	std::vector<std::string> outputs;
-	for (int i = 0; i < argc - 4; i++)
+	for (int i = 0; i < argc - 5; i++)
 	{
-		outputs.push_back( std::string(argv[i+4]));
+		outputs.push_back( std::string(argv[i+5]));
 		std::cerr << "Save to " << outputs[i] << std::endl;
 	}
 
-	std::cerr << std::endl;
-
 	std::vector<std::string> files = readBMP(inputdir);
-	std::vector<std::string> files_csv = readTXT(inputdir);
-	std::string start = files_csv[0];
-	std::string end = files_csv[files_csv.size()-1];
-	start = start.substr(0, start.rfind(".")) + ".bmp";
-	end = end.substr(0, end.rfind(".")) + ".bmp";
 
-	int start_pos = std::find(files.begin(), files.end(), start) - files.begin();
-	int end_pos = std::find(files.begin(), files.end(), end) - files.begin();
+	std::cerr << std::endl;
+	int current = (nbMedian - 1) / 2;
+	int end_pos = files.size() - 1 - (nbMedian - 1) / 2;
 
-	int current = start_pos;
-	
+	if (useCTDData){
+		std::vector<std::string> files_csv = readTXT(inputdir);
+		std::string start = files_csv[0];
+		std::string end = files_csv[files_csv.size() - 1];
+		start = start.substr(0, start.rfind(".")) + ".bmp";
+		end = end.substr(0, end.rfind(".")) + ".bmp";
+
+		int start_pos = std::find(files.begin(), files.end(), start) - files.begin();
+		end_pos = std::find(files.begin(), files.end(), end) - files.begin();
+
+		current = start_pos;
+	}
+
 	while (current <= end_pos){
 		std::vector<cv::Mat> images;
 		for (int i = 0; i < nbMedian; i++)
@@ -256,8 +282,9 @@ int main(int argc, char** argv)
 			}
 		} 
 
-		
-		copyFile(inputdir + slash + files[middle].substr(0, files[middle].rfind(".")) + ".txt", outdir + slash + files[middle].substr(0, files[middle].rfind(".")) + ".txt");
+		if (useCTDData){
+			copyFile(inputdir + slash + files[middle].substr(0, files[middle].rfind(".")) + ".txt", outdir + slash + files[middle].substr(0, files[middle].rfind(".")) + ".txt");
+		}
 		copyFile(inputdir + slash + files[middle], outdir + slash + files[middle]);
 		std::string outputFilenameBackground = files[middle].substr(0, files[middle].length() - 4) + "_background.bmp";
 		cv::imwrite(outdir + slash + outputFilenameBackground, im_out);
