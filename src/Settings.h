@@ -118,6 +118,16 @@ public:
 		return max_threshold;
 	}
 
+	const float& getThresholdAbsolute() const
+	{
+		return thres_absolute;
+	}
+
+	void setThresholdAbsolute(double value)
+	{
+		thres_absolute = value;
+	}
+
 	const double& getContourMinArea() const
 	{
 		return contour_minArea;
@@ -227,6 +237,7 @@ protected:
 
 	//contours
 	float max_threshold;
+	double thres_absolute;
 	double contour_minArea;
 
 	//merge

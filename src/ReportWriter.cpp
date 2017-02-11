@@ -77,6 +77,7 @@ void ReportWriter::writeRawReport(std::vector<Contour*> contours, double time)
 	outfile << "<DEPTHIMAGE>depthImage.png</DEPTHIMAGE>" << std::endl;
 	outfile << "<TIME>" << time << "</TIME>" << std::endl;
 	outfile << "<NBCONTOURS>" << contours.size() << "</NBCONTOURS>" << std::endl;
+	outfile << "<THRES_ABS>" << m_settings->getThresholdAbsolute() << "</THRES_ABS>" << std::endl;
 
 	for (size_t c = 0; c < contours.size(); c++)
 	{
@@ -259,6 +260,8 @@ void ReportWriter::writeXMLReport(std::vector<Contour*> contours, double time)
 	outfile << "<DEPTHIMAGE>depthImage.png</DEPTHIMAGE>" << std::endl;
 	outfile << "<TIME>" << time << "</TIME>" << std::endl;
 	outfile << "<NBCONTOURS>" << contours.size() << "</NBCONTOURS>" << std::endl;
+	outfile << "<THRES_ABS>" << m_settings->getThresholdAbsolute() << "</THRES_ABS>" << std::endl;
+
 	for (size_t c = 0; c < contours.size(); c++)
 	{
 	

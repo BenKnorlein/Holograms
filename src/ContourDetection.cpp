@@ -96,6 +96,11 @@ void ContourDetection::generateMaxMap()
 }
 void ContourDetection::findContours(std::vector<Contour *> &contours )
 {
+	double min_, max_;
+	cv::minMaxLoc(m_image_maximum, &min_, &max_);
+
+	double thres = (max_ - min_) * 0.98 + min_;
+	m_settings->setThresholdAbsolute(thres);
 	normalize(m_image_maximum, m_image_maximum, 0.0, 1.0, CV_MINMAX);
 
 	//threshold	
