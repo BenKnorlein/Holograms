@@ -118,7 +118,7 @@ public:
 		return max_threshold;
 	}
 
-	const float& getThresholdAbsolute() const
+	double getThresholdAbsolute()
 	{
 		return thres_absolute;
 	}

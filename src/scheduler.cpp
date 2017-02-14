@@ -188,6 +188,8 @@ int main(int argc, char** argv)
 					moveFile(inputdir + "//" + filename, outdir + "//" + filename);
 					if (fileExists(inputdir + "//" + filename.substr(0, filename.rfind(".")) + ".txt"))
 						moveFile(inputdir + "//" + filename.substr(0, filename.rfind(".")) + ".txt", outdir + "//" + filename.substr(0, filename.rfind(".")) + ".txt");
+					if (fileExists(inputdir + "//" + filename.substr(0, filename.rfind(".")) + "_diff.png"))
+						moveFile(inputdir + "//" + filename.substr(0, filename.rfind(".")) + "_diff.png", outdir + "//" + filename.substr(0, filename.rfind(".")) + "_diff.png");
 					moveFile(inputdir + "//" + backgroundFilename, outdir + "//" + backgroundFilename);
 
 					serverA++;

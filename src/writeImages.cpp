@@ -215,20 +215,20 @@ int main(int argc, char** argv)
 	if (settings->getStartRemote()){	
 		std::string command;
 		if (serverA == 0){
-			command = "plink SOI1 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_90.xml &> /dev/null &\"";
+			command = "plink SOI1 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_90_direct.xml &> /dev/null &\"";
 			system(command.c_str());
-			command = "plink SOI2 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_95.xml &> /dev/null &\"";
+			command = "plink SOI2 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_95_direct.xml &> /dev/null &\"";
 			system(command.c_str());
-			command = "plink SOI3 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_98.xml &> /dev/null &\"";
+			command = "plink SOI3 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_98_direct.xml &> /dev/null &\"";
 			system(command.c_str());
 		}
 		else
 		{
-			command = "plink SOI4 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_90.xml &> /dev/null &\"";
+			command = "plink SOI4 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_90_direct.xml &> /dev/null &\"";
 			system(command.c_str());
-			command = "plink SOI5 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_95.xml &> /dev/null &\"";
+			command = "plink SOI5 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_95_direct.xml &> /dev/null &\"";
 			system(command.c_str());
-			command = "plink SOI6 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_98.xml &> /dev/null &\"";
+			command = "plink SOI6 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_98_direct.xml &> /dev/null &\"";
 			system(command.c_str());
 		}
 	}

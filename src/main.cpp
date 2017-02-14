@@ -69,16 +69,18 @@ void copyFile(std::string in, std::string out)
 	CopyFile(in.c_str(), out.c_str(), FALSE);
 #else
 	int source = open(in.c_str(), O_RDONLY, 0);
-	int dest = open(out.c_str(), O_WRONLY | O_CREAT /*| O_TRUNC/**/, 0644);
+	if(source > 0){
+		int dest = open(out.c_str(), O_WRONLY | O_CREAT /*| O_TRUNC/**/, 0644);
 
-	// struct required, rationale: function stat() exists also
-	struct stat stat_source;
-	fstat(source, &stat_source);
+		// struct required, rationale: function stat() exists also
+		struct stat stat_source;
+		fstat(source, &stat_source);
 
-	sendfile(dest, source, 0, stat_source.st_size);
+		sendfile(dest, source, 0, stat_source.st_size);
 
-	close(source);
-	close(dest);
+		close(source);
+		close(dest);
+	}
 #endif
 }
 
@@ -244,6 +246,7 @@ int main(int argc, char** argv)
 	copyFile(inDirData + slash + filename, outDirData + slash + filename);
 	copyFile(inDirData + slash + rawfilename + ".xml", outDirData + slash + rawfilename + ".xml");
 	copyFile(inDirData + slash + rawfilename + ".txt", outDirData + slash + rawfilename + ".txt");
+	copyFile(inDirData + slash + rawfilename + "_diff.png", outDirData + slash + rawfilename + "_diff.png");
 	copyFile(inDirData + slash + rawfilename + "_background.bmp", outDirData + slash + rawfilename + "_background.bmp");
 	copyFile(inDirData + slash + "Settings_Writing.xml", outDirData + slash + "Settings_Writing.xml");
 

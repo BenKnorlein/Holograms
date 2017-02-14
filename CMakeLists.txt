@@ -131,6 +131,13 @@ ADD_EXECUTABLE(generateBackground ${GUI_TYPE}
 		${HEADERS}
 )
 
+
+ADD_EXECUTABLE(detectBigParticles ${GUI_TYPE}
+		src/detectBigParticles.cpp
+		${SOURCES} 
+		${HEADERS}
+)
+
 if(MSVC OR MSVC_IDE)
 ADD_EXECUTABLE(scheduler ${GUI_TYPE}
 		src/scheduler.cpp
@@ -158,6 +165,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(writeImages ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(testScore ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(generateBackground ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(detectBigParticles ${OpenCV_LIBS})
 
 if(MSVC OR MSVC_IDE)
 TARGET_LINK_LIBRARIES(refineReports ${OpenCV_LIBS})
