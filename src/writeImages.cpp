@@ -208,11 +208,11 @@ int main(int argc, char** argv)
 	
 	writeImages(filename, settings, background);
 
-	copyFile("Z://FK170124//holograms//Settings//Settings_90.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_90.xml");
-	copyFile("Z://FK170124//holograms//Settings//Settings_95.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_95.xml");
-	copyFile("Z://FK170124//holograms//Settings//Settings_98.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_98.xml");
-
 	if (settings->getStartRemote()){	
+		copyFile("Z://FK170124//holograms//Settings//Settings_90_direct.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_90_direct.xml");
+		copyFile("Z://FK170124//holograms//Settings//Settings_95_direct.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_95_direct.xml");
+		copyFile("Z://FK170124//holograms//Settings//Settings_98_direct.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_98_direct.xml");
+
 		std::string command;
 		if (serverA == 0){
 			command = "plink SOI1 \"sudo /export/users/ubuntu/holograms/Holograms/build/bin/Holograms " + filename + " /data2/FK170124/holograms/temporaryData/" + filename + "/Settings_90_direct.xml &> /dev/null &\"";
@@ -234,6 +234,11 @@ int main(int argc, char** argv)
 	}
 	else
 	{
+
+		copyFile("Z://FK170124//holograms//Settings//Settings_90.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_90.xml");
+		copyFile("Z://FK170124//holograms//Settings//Settings_95.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_95.xml");
+		copyFile("Z://FK170124//holograms//Settings//Settings_98.xml", settings->getOutputFolder() + slash + filename + slash + "//Settings_98.xml");
+
 		std::string outbatchFile = settings->getOutputFolder() + slash + "batch" + std::to_string(serverA);
 		std::cerr << "Write to " << outbatchFile << std::endl;
 		std::ofstream outfile(outbatchFile, std::ofstream::out | std::ofstream::app);

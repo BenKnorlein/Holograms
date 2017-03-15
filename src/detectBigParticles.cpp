@@ -229,11 +229,29 @@ int main(int argc, char** argv)
 	int nbMedian = std::atoi(argv[2]);
 	std::string outdir = std::string(argv[3]);
 	double thresh = std::stof(argv[4]);
+
+	bool useCTDData = false;
+	if (argc > 5){
+		useCTDData = std::atoi(argv[5]);
+	}
 	std::vector<std::string> files = readBMP(inputdir);
 
 	std::cerr << std::endl;
 	int current =(nbMedian - 1) / 2 + 5;
 	int end_pos = files.size() - 1 - (nbMedian - 1) / 2;
+
+	if (useCTDData){
+		std::vector<std::string> files_csv = readTXT(inputdir);
+		std::string start = files_csv[0];
+		std::string end = files_csv[files_csv.size() - 1];
+		start = start.substr(0, start.rfind(".")) + ".bmp";
+		end = end.substr(0, end.rfind(".")) + ".bmp";
+
+		int start_pos = std::find(files.begin(), files.end(), start) - files.begin();
+		end_pos = std::find(files.begin(), files.end(), end) - files.begin();
+
+		current = start_pos;
+	}
 
 	while (current <= end_pos){
 		std::vector<cv::Mat> images;
@@ -372,7 +390,9 @@ int main(int argc, char** argv)
 
 
 			copyFile(inputdir + slash + files[middle].substr(0, files[middle].rfind(".")) + ".txt", outdir + slash + files[middle].substr(0, files[middle].rfind(".")) + ".txt");
-
+			if (useCTDData){
+				copyFile(inputdir + slash + files[middle].substr(0, files[middle].rfind(".")) + ".txt", outdir + slash + files[middle].substr(0, files[middle].rfind(".")) + ".txt");
+			}
 			copyFile(inputdir + slash + files[middle], outdir + slash + files[middle]);
 			std::string outputFilenameBackground = files[middle].substr(0, files[middle].length() - 4) + "_background.bmp";
 			cv::imwrite(outdir + slash + outputFilenameBackground, im_out);
